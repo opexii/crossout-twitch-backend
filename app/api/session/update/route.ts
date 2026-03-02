@@ -20,7 +20,9 @@ export type SessionPayload = {
   };
   fights: Array<{
     map: string;
+    map_tech: string;
     mode: string;
+    mode_tech: string;
     is_win: boolean | null;
     kills: number;
     deaths: number;
@@ -32,6 +34,23 @@ export type SessionPayload = {
     is_bon_match: boolean;
     mvp: boolean;
     half_mvp: boolean;
+    is_ffa: boolean;
+    winner_team: string | number | null;
+    players: Array<{
+      nickname: string;
+      team: string | number | null;
+      is_bot: boolean;
+      power_score: number;
+      kills: number;
+      deaths: number;
+      damage_dealt: number;
+      damage_received: number;
+      score: number;
+      weapons_def: string[];
+      weapons: string[];
+      is_self: boolean;
+      placement?: number;
+    }>;
   }>;
 };
 
