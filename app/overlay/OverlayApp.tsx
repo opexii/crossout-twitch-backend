@@ -539,6 +539,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
         <PlayersTable
           fight={fight}
           players={rightTeam}
+          alignRight
           selectedPlayer={selectedPlayer}
           onSelectPlayer={setSelectedPlayer}
         />
@@ -581,12 +582,14 @@ function PlayersTable({
   showPlacement = false,
   selectedPlayer,
   onSelectPlayer,
+  alignRight = false,
 }: {
   fight: FightDto;
   players: PlayerDto[];
   showPlacement?: boolean;
   selectedPlayer?: PlayerDto | null;
   onSelectPlayer?: (p: PlayerDto) => void;
+  alignRight?: boolean;
 }) {
   if (!players.length) {
     return <div style={{ fontSize: 12, opacity: 0.7 }}>Нет данных.</div>;
@@ -603,14 +606,30 @@ function PlayersTable({
       <thead>
         <tr>
           {showPlacement && <th style={thStyle}>#</th>}
-          <th style={thStyle}>Игрок</th>
-          <th style={thStyle}>Оружие</th>
-          <th style={thStyle}>Урон</th>
-          <th style={thStyle}>Получил</th>
-          <th style={thStyle}>K</th>
-          <th style={thStyle}>D</th>
-          <th style={thStyle}>Очки</th>
-          <th style={thStyle}>ОМ</th>
+          {!alignRight && (
+            <>
+              <th style={thStyle}>Игрок</th>
+              <th style={thStyle}>Оружие</th>
+              <th style={thStyle}>Урон</th>
+              <th style={thStyle}>Получил</th>
+              <th style={thStyle}>K</th>
+              <th style={thStyle}>D</th>
+              <th style={thStyle}>Очки</th>
+              <th style={thStyle}>ОМ</th>
+            </>
+          )}
+          {alignRight && (
+            <>
+              <th style={thStyle}>ОМ</th>
+              <th style={thStyle}>Очки</th>
+              <th style={thStyle}>D</th>
+              <th style={thStyle}>K</th>
+              <th style={thStyle}>Получил</th>
+              <th style={thStyle}>Урон</th>
+              <th style={thStyle}>Оружие</th>
+              <th style={thStyle}>Игрок</th>
+            </>
+          )}
         </tr>
       </thead>
       <tbody>
@@ -635,23 +654,52 @@ function PlayersTable({
               onClick={() => onSelectPlayer?.(p)}
             >
               {showPlacement && <td style={tdStyleCentered}>{placeLabel}</td>}
-              <td style={tdStyle}>
-                <span style={nameStyle}>{p.nickname}</span>
-                {p.is_bot && (
-                  <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
-                )}
-              </td>
-              <td style={tdStyle}>
-                {p.weapons && p.weapons.length
-                  ? p.weapons.join(", ")
-                  : p.weapons_def.join(", ")}
-              </td>
-              <td style={tdStyleCentered}>{Math.round(p.damage_dealt)}</td>
-              <td style={tdStyleCentered}>{Math.round(p.damage_received)}</td>
-              <td style={tdStyleCentered}>{p.kills}</td>
-              <td style={tdStyleCentered}>{p.deaths}</td>
-              <td style={tdStyleCentered}>{p.score}</td>
-              <td style={tdStyleCentered}>{p.power_score || ""}</td>
+              {!alignRight && (
+                <>
+                  <td style={tdStyle}>
+                    <span style={nameStyle}>{p.nickname}</span>
+                    {p.is_bot && (
+                      <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
+                    )}
+                  </td>
+                  <td style={tdStyle}>
+                    {p.weapons && p.weapons.length
+                      ? p.weapons.join(", ")
+                      : p.weapons_def.join(", ")}
+                  </td>
+                  <td style={tdStyleCentered}>{Math.round(p.damage_dealt)}</td>
+                  <td style={tdStyleCentered}>
+                    {Math.round(p.damage_received)}
+                  </td>
+                  <td style={tdStyleCentered}>{p.kills}</td>
+                  <td style={tdStyleCentered}>{p.deaths}</td>
+                  <td style={tdStyleCentered}>{p.score}</td>
+                  <td style={tdStyleCentered}>{p.power_score || ""}</td>
+                </>
+              )}
+              {alignRight && (
+                <>
+                  <td style={tdStyleCentered}>{p.power_score || ""}</td>
+                  <td style={tdStyleCentered}>{p.score}</td>
+                  <td style={tdStyleCentered}>{p.deaths}</td>
+                  <td style={tdStyleCentered}>{p.kills}</td>
+                  <td style={tdStyleCentered}>
+                    {Math.round(p.damage_received)}
+                  </td>
+                  <td style={tdStyleCentered}>{Math.round(p.damage_dealt)}</td>
+                  <td style={tdStyle}>
+                    {p.weapons && p.weapons.length
+                      ? p.weapons.join(", ")
+                      : p.weapons_def.join(", ")}
+                  </td>
+                  <td style={{ ...tdStyle, textAlign: "right" }}>
+                    <span style={nameStyle}>{p.nickname}</span>
+                    {p.is_bot && (
+                      <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
+                    )}
+                  </td>
+                </>
+              )}
             </tr>
           );
         })}
