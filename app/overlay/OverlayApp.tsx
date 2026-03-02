@@ -255,12 +255,22 @@ function HistoryView({
     );
   }
 
-  const clampedIndex = Math.min(Math.max(selectedIndex, 0), fights.length - 1);
-  const selectedFight = fights[clampedIndex];
+  // В fights порядок от старых к новым — разворачиваем, чтобы новые были сверху.
+  const orderedFights = [...fights].reverse();
+
+  const clampedIndex = Math.min(
+    Math.max(selectedIndex, 0),
+    orderedFights.length - 1,
+  );
+  const selectedFight = orderedFights[clampedIndex];
 
   return (
     <>
-      <FightsTable fights={fights} selectedIndex={clampedIndex} onSelect={onSelect} />
+      <FightsTable
+        fights={orderedFights}
+        selectedIndex={clampedIndex}
+        onSelect={onSelect}
+      />
       <FightTeamsPanel fight={selectedFight} />
     </>
   );
@@ -415,6 +425,10 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
 
   const isFfa = fight.is_ffa;
 
+  // Определяем команду текущего игрока, чтобы его команда всегда была слева
+  const selfPlayer = players.find((p) => p.is_self);
+  const selfTeam = selfPlayer?.team ?? null;
+
   const team1: PlayerDto[] = [];
   const team2: PlayerDto[] = [];
   const unknown: PlayerDto[] = [];
@@ -457,9 +471,21 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
     );
   }
 
-  // Обычный режим: две команды
-  team1.sort((a, b) => b.damage_dealt - a.damage_dealt);
-  team2.sort((a, b) => b.damage_dealt - a.damage_dealt);
+  // Обычный режим: две команды. Гарантируем, что команда текущего игрока (если есть) слева.
+  let leftTeam = team1;
+  let rightTeam = team2;
+
+  if (selfTeam !== null) {
+    const selfInTeam1 = team1.some((p) => p.team === selfTeam);
+    const selfInTeam2 = team2.some((p) => p.team === selfTeam);
+    if (!selfInTeam1 && selfInTeam2) {
+      leftTeam = team2;
+      rightTeam = team1;
+    }
+  }
+
+  leftTeam.sort((a, b) => b.damage_dealt - a.damage_dealt);
+  rightTeam.sort((a, b) => b.damage_dealt - a.damage_dealt);
 
   return (
     <div
@@ -481,7 +507,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
         <div style={{ marginBottom: 4, fontSize: 13, color: "#a5d6a7" }}>
           Команда 1
         </div>
-        <PlayersTable players={team1} />
+        <PlayersTable fight={fight} players={leftTeam} />
       </div>
       <div
         style={{
@@ -494,7 +520,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
         <div style={{ marginBottom: 4, fontSize: 13, color: "#ef9a9a" }}>
           Команда 2
         </div>
-        <PlayersTable players={team2} />
+        <PlayersTable fight={fight} players={rightTeam} />
       </div>
       {unknown.length > 0 && (
         <div
@@ -509,7 +535,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.8 }}>
             Без команды
           </div>
-          <PlayersTable players={unknown} />
+            <PlayersTable fight={fight} players={unknown} />
         </div>
       )}
     </div>
@@ -520,6 +546,7 @@ function PlayersTable({
   players,
   showPlacement = false,
 }: {
+  fight: FightDto;
   players: PlayerDto[];
   showPlacement?: boolean;
 }) {
@@ -557,6 +584,10 @@ function PlayersTable({
           const placeLabel =
             showPlacement && p.placement != null ? p.placement : idx + 1;
 
+          const damageTargets = p.damage_to_players
+            ? Object.entries(p.damage_to_players).sort((a, b) => b[1] - a[1])
+            : [];
+
           return (
             <tr key={p.nickname + idx}>
               {showPlacement && <td style={tdStyleCentered}>{placeLabel}</td>}
@@ -564,6 +595,25 @@ function PlayersTable({
                 <span style={nameStyle}>{p.nickname}</span>
                 {p.is_bot && (
                   <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
+                )}
+                {damageTargets.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: 2,
+                      fontSize: 10,
+                      opacity: 0.8,
+                      maxWidth: 260,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    Урон по:{" "}
+                    {damageTargets
+                      .slice(0, 4)
+                      .map(([nick, dmg]) => `${nick} (${Math.round(dmg)})`)
+                      .join(", ")}
+                  </div>
                 )}
               </td>
               <td style={tdStyle}>

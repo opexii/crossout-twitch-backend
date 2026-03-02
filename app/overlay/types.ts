@@ -26,6 +26,7 @@ export interface PlayerDto {
   weapons: string[];
   is_self: boolean;
   placement?: number;
+  damage_to_players?: Record<string, number>;
 }
 
 export interface FightDto {

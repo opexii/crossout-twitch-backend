@@ -50,6 +50,7 @@ export type SessionPayload = {
       weapons: string[];
       is_self: boolean;
       placement?: number;
+      damage_to_players?: Record<string, number>;
     }>;
   }>;
 };
