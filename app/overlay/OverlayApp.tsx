@@ -429,6 +429,10 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
   const selfPlayer = players.find((p) => p.is_self);
   const selfTeam = selfPlayer?.team ?? null;
 
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerDto | null>(
+    selfPlayer ?? players[0] ?? null,
+  );
+
   const team1: PlayerDto[] = [];
   const team2: PlayerDto[] = [];
   const unknown: PlayerDto[] = [];
@@ -466,7 +470,14 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
         <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.8 }}>
           Режим FFA — результаты по игрокам
         </div>
-        <PlayersTable fight={fight} players={team1} showPlacement />
+        <PlayersTable
+          fight={fight}
+          players={team1}
+          showPlacement
+          selectedPlayer={selectedPlayer}
+          onSelectPlayer={setSelectedPlayer}
+        />
+        <PlayerDetailsPanel player={selectedPlayer} fight={fight} />
       </div>
     );
   }
@@ -507,7 +518,12 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
         <div style={{ marginBottom: 4, fontSize: 13, color: "#a5d6a7" }}>
           Команда 1
         </div>
-        <PlayersTable fight={fight} players={leftTeam} />
+        <PlayersTable
+          fight={fight}
+          players={leftTeam}
+          selectedPlayer={selectedPlayer}
+          onSelectPlayer={setSelectedPlayer}
+        />
       </div>
       <div
         style={{
@@ -520,7 +536,12 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
         <div style={{ marginBottom: 4, fontSize: 13, color: "#ef9a9a" }}>
           Команда 2
         </div>
-        <PlayersTable fight={fight} players={rightTeam} />
+        <PlayersTable
+          fight={fight}
+          players={rightTeam}
+          selectedPlayer={selectedPlayer}
+          onSelectPlayer={setSelectedPlayer}
+        />
       </div>
       {unknown.length > 0 && (
         <div
@@ -535,9 +556,22 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.8 }}>
             Без команды
           </div>
-            <PlayersTable fight={fight} players={unknown} />
+          <PlayersTable
+            fight={fight}
+            players={unknown}
+            selectedPlayer={selectedPlayer}
+            onSelectPlayer={setSelectedPlayer}
+          />
         </div>
       )}
+      <div
+        style={{
+          gridColumn: "1 / span 2",
+          marginTop: 6,
+        }}
+      >
+        <PlayerDetailsPanel player={selectedPlayer} fight={fight} />
+      </div>
     </div>
   );
 }
@@ -545,10 +579,14 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
 function PlayersTable({
   players,
   showPlacement = false,
+  selectedPlayer,
+  onSelectPlayer,
 }: {
   fight: FightDto;
   players: PlayerDto[];
   showPlacement?: boolean;
+  selectedPlayer?: PlayerDto | null;
+  onSelectPlayer?: (p: PlayerDto) => void;
 }) {
   if (!players.length) {
     return <div style={{ fontSize: 12, opacity: 0.7 }}>Нет данных.</div>;
@@ -589,7 +627,17 @@ function PlayersTable({
             : [];
 
           return (
-            <tr key={p.nickname + idx}>
+            <tr
+              key={p.nickname + idx}
+              style={{
+                backgroundColor:
+                  selectedPlayer && selectedPlayer.nickname === p.nickname
+                    ? "rgba(255,255,255,0.08)"
+                    : "transparent",
+                cursor: onSelectPlayer ? "pointer" : "default",
+              }}
+              onClick={() => onSelectPlayer?.(p)}
+            >
               {showPlacement && <td style={tdStyleCentered}>{placeLabel}</td>}
               <td style={tdStyle}>
                 <span style={nameStyle}>{p.nickname}</span>
@@ -630,6 +678,99 @@ function PlayersTable({
         })}
       </tbody>
     </table>
+  );
+}
+
+function PlayerDetailsPanel({
+  player,
+  fight,
+}: {
+  player: PlayerDto | null;
+  fight: FightDto;
+}) {
+  if (!player) {
+    return null;
+  }
+
+  const damageTargets = player.damage_to_players
+    ? Object.entries(player.damage_to_players).sort((a, b) => b[1] - a[1])
+    : [];
+
+  return (
+    <div
+      style={{
+        padding: 8,
+        borderRadius: 4,
+        background: "#151515",
+        border: "1px solid #333",
+        fontSize: 12,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 8,
+          flexWrap: "wrap",
+          marginBottom: 6,
+        }}
+      >
+        <div>
+          <div style={{ fontWeight: 600 }}>{player.nickname}</div>
+          <div style={{ opacity: 0.8 }}>
+            Оружие:{" "}
+            {player.weapons?.length
+              ? player.weapons.join(", ")
+              : player.weapons_def.join(", ") || "—"}
+          </div>
+        </div>
+        <div>
+          <div>
+            Урон: <strong>{Math.round(player.damage_dealt)}</strong>
+          </div>
+          <div>
+            Получил: <strong>{Math.round(player.damage_received)}</strong>
+          </div>
+        </div>
+        <div>
+          <div>
+            K / D:{" "}
+            <strong>
+              {player.kills} / {player.deaths}
+            </strong>
+          </div>
+          <div>
+            Очки: <strong>{player.score}</strong>
+          </div>
+        </div>
+      </div>
+
+      {damageTargets.length > 0 && (
+        <div>
+          <div style={{ opacity: 0.8, marginBottom: 2 }}>Подробный урон по:</div>
+          <div
+            style={{
+              maxHeight: 120,
+              overflowY: "auto",
+              paddingRight: 4,
+            }}
+          >
+            {damageTargets.map(([nick, dmg]) => (
+              <div
+                key={nick}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span>{nick}</span>
+                <span>{Math.round(dmg)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
