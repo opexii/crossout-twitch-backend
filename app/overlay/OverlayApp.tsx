@@ -466,7 +466,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
         <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.8 }}>
           Режим FFA — результаты по игрокам
         </div>
-        <PlayersTable players={team1} showPlacement />
+        <PlayersTable fight={fight} players={team1} showPlacement />
       </div>
     );
   }
