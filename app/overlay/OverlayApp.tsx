@@ -22,13 +22,15 @@ export function OverlayApp() {
   useEffect(() => {
     if (!channelId) return;
 
+    const id = channelId; // локальная неизменяемая копия для TypeScript
+
     let cancelled = false;
 
     async function load() {
       try {
         setLoading(true);
         setError(null);
-        const session = await fetchSession(channelId);
+        const session = await fetchSession(id);
         if (!cancelled) {
           setData(session);
         }
