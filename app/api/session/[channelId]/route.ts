@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "../update/route";
+import { getSession } from "../store";
 
 type Params = {
   params: {

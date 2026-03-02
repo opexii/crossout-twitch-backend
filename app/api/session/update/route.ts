@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { listSessions, setSession } from "../store";
 
 export type SessionPayload = {
   schema: number;
@@ -34,9 +35,6 @@ export type SessionPayload = {
   }>;
 };
 
-// Простое in-memory хранилище (на один инстанс serverless функции)
-const sessions = new Map<string, SessionPayload>();
-
 export async function POST(req: NextRequest) {
   try {
     const payload = (await req.json()) as SessionPayload;
@@ -52,7 +50,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    sessions.set(payload.channel_id, payload);
+    setSession(payload.channel_id, payload);
 
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -61,14 +59,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Вспомогательная функция для других роутов
-export function getSession(channelId: string): SessionPayload | null {
-  return sessions.get(channelId) ?? null;
-}
-
 // Вспомогательный GET, чтобы можно было посмотреть список доступных каналов
 export function GET() {
-  const summary = Array.from(sessions.values()).map((s) => ({
+  const summary = listSessions().map((s) => ({
     channel_id: s.channel_id,
     nickname: s.nickname,
     fights: s.fights.length,
