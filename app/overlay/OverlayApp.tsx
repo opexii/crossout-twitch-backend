@@ -13,6 +13,7 @@ export function OverlayApp() {
   const [data, setData] = useState<SessionResponseDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("history");
   const [selectedFightIndex, setSelectedFightIndex] = useState<number>(0);
 
@@ -33,11 +34,15 @@ export function OverlayApp() {
 
     async function load() {
       try {
-        setLoading(true);
+        // Полный индикатор "Загрузка..." показываем только при первом запросе
+        if (!hasLoadedOnce) {
+          setLoading(true);
+        }
         setError(null);
         const session = await fetchSession(id);
         if (!cancelled) {
           setData(session);
+          setHasLoadedOnce(true);
         }
       } catch (e: any) {
         if (!cancelled) {
@@ -92,7 +97,9 @@ export function OverlayApp() {
         </div>
       )}
 
-      {loading && <p style={{ marginTop: 8 }}>Загрузка…</p>}
+      {loading && !hasLoadedOnce && (
+        <p style={{ marginTop: 8 }}>Загрузка…</p>
+      )}
 
       {!loading && !error && channelId && !data && (
         <p style={{ marginTop: 8, fontSize: 14 }}>
@@ -148,7 +155,7 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
         <div>
           <div style={{ fontWeight: 600 }}>{session.nickname}</div>
           <div style={{ opacity: 0.8 }}>
-            Набор: <span>{s.weapon_set || "—"}</span>
+            Оружие: <span>{s.weapon_set || "—"}</span>
           </div>
         </div>
         <div>
