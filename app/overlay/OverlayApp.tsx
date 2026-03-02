@@ -740,31 +740,55 @@ function PlayerDetailsPanel({
       {(damageTargets.length > 0 || incomingTargets.length > 0) && (
         <div
           style={{
-            marginTop: 6,
+            marginTop: 8,
+            paddingTop: 6,
+            borderTop: "1px solid #333",
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
             gap: 12,
           }}
         >
-          <div>
-            <div style={{ opacity: 0.8, marginBottom: 2 }}>Урон по:</div>
+          {/* Исходящий урон */}
+          <div
+            style={{
+              borderRight: "1px solid #333",
+              paddingRight: 8,
+            }}
+          >
             <div
               style={{
-                maxHeight: 130,
-                overflowY: "auto",
-                paddingRight: 4,
+                fontSize: 11,
+                fontWeight: 600,
+                marginBottom: 4,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
               }}
             >
-              {damageTargets.map(([nick, dmg]) => (
+              Урон по
+            </div>
+            <div
+              style={{
+                maxHeight: 120,
+                overflowY: "auto",
+              }}
+            >
+              {damageTargets.map(([nick, dmg], idx) => (
                 <div
                   key={nick}
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
+                    borderBottom: "1px solid #222",
+                    padding: "2px 4px",
+                    backgroundColor:
+                      idx % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                    borderRadius: 2,
                   }}
                 >
                   <span>{nick}</span>
-                  <span>{Math.round(dmg)}</span>
+                  <span style={{ fontWeight: 500, textAlign: "right" }}>
+                    {Math.round(dmg)}
+                  </span>
                 </div>
               ))}
               {!damageTargets.length && (
@@ -772,27 +796,43 @@ function PlayerDetailsPanel({
               )}
             </div>
           </div>
+
+          {/* Входящий урон */}
           <div>
-            <div style={{ opacity: 0.8, marginBottom: 2 }}>
-              Получил урон от:
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                marginBottom: 4,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              Получил урон от
             </div>
             <div
               style={{
-                maxHeight: 130,
+                maxHeight: 120,
                 overflowY: "auto",
-                paddingRight: 4,
               }}
             >
-              {incomingTargets.map(([nick, dmg]) => (
+              {incomingTargets.map(([nick, dmg], idx) => (
                 <div
                   key={nick}
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
+                    borderBottom: "1px solid #222",
+                    padding: "2px 4px",
+                    backgroundColor:
+                      idx % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                    borderRadius: 2,
                   }}
                 >
                   <span>{nick}</span>
-                  <span>{Math.round(dmg)}</span>
+                  <span style={{ fontWeight: 500, textAlign: "right" }}>
+                    {Math.round(dmg)}
+                  </span>
                 </div>
               ))}
               {!incomingTargets.length && (
