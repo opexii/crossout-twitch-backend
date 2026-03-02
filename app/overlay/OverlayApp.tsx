@@ -599,20 +599,18 @@ function PlayersTable({
                 {damageTargets.length > 0 && (
                   <div
                     style={{
-                      marginTop: 2,
+                      marginTop: 3,
                       fontSize: 10,
-                      opacity: 0.8,
+                      opacity: 0.85,
                       maxWidth: 260,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
                     }}
                   >
-                    Урон по:{" "}
-                    {damageTargets
-                      .slice(0, 4)
-                      .map(([nick, dmg]) => `${nick} (${Math.round(dmg)})`)
-                      .join(", ")}
+                    Урон по:
+                    {damageTargets.slice(0, 6).map(([nick, dmg]) => (
+                      <div key={nick}>
+                        • {nick}: {Math.round(dmg)}
+                      </div>
+                    ))}
                   </div>
                 )}
               </td>
