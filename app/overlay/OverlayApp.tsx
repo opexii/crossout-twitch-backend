@@ -622,10 +622,6 @@ function PlayersTable({
           const placeLabel =
             showPlacement && p.placement != null ? p.placement : idx + 1;
 
-          const damageTargets = p.damage_to_players
-            ? Object.entries(p.damage_to_players).sort((a, b) => b[1] - a[1])
-            : [];
-
           return (
             <tr
               key={p.nickname + idx}
@@ -643,23 +639,6 @@ function PlayersTable({
                 <span style={nameStyle}>{p.nickname}</span>
                 {p.is_bot && (
                   <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
-                )}
-                {damageTargets.length > 0 && (
-                  <div
-                    style={{
-                      marginTop: 3,
-                      fontSize: 10,
-                      opacity: 0.85,
-                      maxWidth: 260,
-                    }}
-                  >
-                    Урон по:
-                    {damageTargets.slice(0, 6).map(([nick, dmg]) => (
-                      <div key={nick}>
-                        • {nick}: {Math.round(dmg)}
-                      </div>
-                    ))}
-                  </div>
                 )}
               </td>
               <td style={tdStyle}>
@@ -695,6 +674,19 @@ function PlayerDetailsPanel({
   const damageTargets = player.damage_to_players
     ? Object.entries(player.damage_to_players).sort((a, b) => b[1] - a[1])
     : [];
+
+  // Входящий урон: инверсия damage_to_players по всем игрокам боя
+  const incomingMap = new Map<string, number>();
+  for (const p of fight.players || []) {
+    if (!p.damage_to_players) continue;
+    if (p.nickname === player.nickname) continue;
+    const dmg = p.damage_to_players[player.nickname];
+    if (!dmg || dmg <= 0) continue;
+    incomingMap.set(p.nickname, (incomingMap.get(p.nickname) || 0) + dmg);
+  }
+  const incomingTargets = Array.from(incomingMap.entries()).sort(
+    (a, b) => b[1] - a[1],
+  );
 
   return (
     <div
@@ -745,28 +737,68 @@ function PlayerDetailsPanel({
         </div>
       </div>
 
-      {damageTargets.length > 0 && (
-        <div>
-          <div style={{ opacity: 0.8, marginBottom: 2 }}>Подробный урон по:</div>
-          <div
-            style={{
-              maxHeight: 120,
-              overflowY: "auto",
-              paddingRight: 4,
-            }}
-          >
-            {damageTargets.map(([nick, dmg]) => (
-              <div
-                key={nick}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span>{nick}</span>
-                <span>{Math.round(dmg)}</span>
-              </div>
-            ))}
+      {(damageTargets.length > 0 || incomingTargets.length > 0) && (
+        <div
+          style={{
+            marginTop: 6,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 12,
+          }}
+        >
+          <div>
+            <div style={{ opacity: 0.8, marginBottom: 2 }}>Урон по:</div>
+            <div
+              style={{
+                maxHeight: 130,
+                overflowY: "auto",
+                paddingRight: 4,
+              }}
+            >
+              {damageTargets.map(([nick, dmg]) => (
+                <div
+                  key={nick}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>{nick}</span>
+                  <span>{Math.round(dmg)}</span>
+                </div>
+              ))}
+              {!damageTargets.length && (
+                <div style={{ opacity: 0.6, fontSize: 11 }}>нет данных</div>
+              )}
+            </div>
+          </div>
+          <div>
+            <div style={{ opacity: 0.8, marginBottom: 2 }}>
+              Получил урон от:
+            </div>
+            <div
+              style={{
+                maxHeight: 130,
+                overflowY: "auto",
+                paddingRight: 4,
+              }}
+            >
+              {incomingTargets.map(([nick, dmg]) => (
+                <div
+                  key={nick}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>{nick}</span>
+                  <span>{Math.round(dmg)}</span>
+                </div>
+              ))}
+              {!incomingTargets.length && (
+                <div style={{ opacity: 0.6, fontSize: 11 }}>нет данных</div>
+              )}
+            </div>
           </div>
         </div>
       )}
