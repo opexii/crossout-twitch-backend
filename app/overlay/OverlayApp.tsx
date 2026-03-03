@@ -663,6 +663,8 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
   const unknown: PlayerDto[] = [];
 
   for (const p of players) {
+    // Для режима «Вторжение» башни и левиафаны уже размечены по командам (1 и 2)
+    // и попадают в те же таблицы, что и игроки.
     if (isFfa) {
       team1.push(p);
     } else if (p.team === 1 || p.team === "1") {
