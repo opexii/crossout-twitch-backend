@@ -314,8 +314,15 @@ function RatingView({ session }: { session: SessionResponseDto }) {
   }
 
   const [activeIdx, setActiveIdx] = useState(0);
+  const [search, setSearch] = useState("");
   const safeIdx = Math.min(Math.max(activeIdx, 0), tabs.length - 1);
   const active = tabs[safeIdx];
+
+  const norm = search.trim().toLowerCase();
+  const allPlayers = active.players || [];
+  const filteredPlayers = norm
+    ? allPlayers.filter((p) => p.nickname.toLowerCase().includes(norm))
+    : allPlayers;
 
   return (
     <div style={{ marginTop: 10 }}>
@@ -350,6 +357,36 @@ function RatingView({ session }: { session: SessionResponseDto }) {
             </button>
           );
         })}
+      </div>
+
+      {/* Поиск по никнейму */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+          fontSize: 12,
+        }}
+      >
+        <span>Поиск:</span>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Введите ник..."
+          style={{
+            flex: "0 0 200px",
+            background: "#111",
+            border: "1px solid #444",
+            borderRadius: 4,
+            padding: "3px 6px",
+            color: "#eee",
+            fontSize: 12,
+          }}
+        />
+        <span style={{ opacity: 0.7 }}>
+          Игроков: {filteredPlayers.length}/{allPlayers.length}
+        </span>
       </div>
 
       {/* Две таблицы: игроки слева, оружие справа */}
@@ -396,7 +433,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
                 </tr>
               </thead>
               <tbody>
-                {(active.players || []).map((p, idx) => (
+                {filteredPlayers.map((p, idx) => (
                   <tr
                     key={p.nickname + idx}
                     style={{
