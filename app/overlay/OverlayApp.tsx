@@ -374,13 +374,14 @@ function FightsTable({
             const resultText =
               f.is_win === true ? "Победа" : f.is_win === false ? "Поражение" : "—";
 
+            const fightNumber = fights.length - idx;
             return (
               <tr
                 key={idx}
                 style={{ background: bg, cursor: "pointer" }}
                 onClick={() => onSelect(idx)}
               >
-                <td style={tdStyle}>{idx + 1}</td>
+                <td style={tdStyleCentered}>{fightNumber}</td>
                 <td style={tdStyle}>{f.map || "—"}</td>
                 <td style={tdStyle}>{f.mode || "—"}</td>
                 <td style={tdStyle}>{resultText}</td>
@@ -662,7 +663,7 @@ function PlayersTable({
                       <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
                     )}
                   </td>
-                  <td style={tdStyle}>
+                  <td style={tdStyleCentered}>
                     {p.weapons && p.weapons.length
                       ? p.weapons.join(", ")
                       : p.weapons_def.join(", ")}
@@ -687,7 +688,7 @@ function PlayersTable({
                     {Math.round(p.damage_received)}
                   </td>
                   <td style={tdStyleCentered}>{Math.round(p.damage_dealt)}</td>
-                  <td style={tdStyle}>
+                  <td style={tdStyleCentered}>
                     {p.weapons && p.weapons.length
                       ? p.weapons.join(", ")
                       : p.weapons_def.join(", ")}
@@ -820,6 +821,19 @@ function PlayerDetailsPanel({
                 overflowY: "auto",
               }}
             >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1fr) 60px",
+                  columnGap: 6,
+                  fontSize: 10,
+                  opacity: 0.7,
+                  marginBottom: 2,
+                }}
+              >
+                <span>Игрок</span>
+                <span style={{ textAlign: "right" }}>Урон</span>
+              </div>
               {damageTargets.map(([nick, dmg], idx) => (
                 <div
                   key={nick}
@@ -871,6 +885,19 @@ function PlayerDetailsPanel({
                 overflowY: "auto",
               }}
             >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1fr) 60px",
+                  columnGap: 6,
+                  fontSize: 10,
+                  opacity: 0.7,
+                  marginBottom: 2,
+                }}
+              >
+                <span>Игрок</span>
+                <span style={{ textAlign: "right" }}>Урон</span>
+              </div>
               {incomingTargets.map(([nick, dmg], idx) => (
                 <div
                   key={nick}
