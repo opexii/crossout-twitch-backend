@@ -55,6 +55,33 @@ export type SessionPayload = {
       damage_to_players?: Record<string, number>;
     }>;
   }>;
+  rating_tabs?: Array<{
+    id: string;
+    name: string;
+    is_custom: boolean;
+    players: Array<{
+      nickname: string;
+      place: number;
+      rating: number;
+      games: number;
+      kills: number;
+      deaths: number;
+      kd: number;
+      avg_damage: number;
+      avg_score: number;
+      mvp: number;
+      wins: number;
+      losses: number;
+      wr_percent: number;
+    }>;
+    weapons: Array<{
+      name: string;
+      users: number;
+      wr_percent: number;
+      avg_damage: number;
+      avg_kills: number;
+    }>;
+  }>;
 };
 
 export async function POST(req: NextRequest) {

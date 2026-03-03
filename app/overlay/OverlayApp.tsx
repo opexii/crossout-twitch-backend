@@ -277,35 +277,218 @@ function HistoryView({
 }
 
 function RatingView({ session }: { session: SessionResponseDto }) {
-  const s = session.session;
-  const fights = s.total_fights || 0;
-  const kd = s.deaths > 0 ? s.kills / s.deaths : s.kills;
-  const winrate =
-    s.wins + s.losses > 0 ? (s.wins / (s.wins + s.losses)) * 100 : 0;
+  const tabs = session.rating_tabs || [];
+
+  // Fallback: если нет подробных данных рейтинга, показываем старый блок суммарной статистики.
+  if (!tabs.length) {
+    const s = session.session;
+    const fights = s.total_fights || 0;
+    const kd = s.deaths > 0 ? s.kills / s.deaths : s.kills;
+    const winrate =
+      s.wins + s.losses > 0 ? (s.wins / (s.wins + s.losses)) * 100 : 0;
+
+    return (
+      <div
+        style={{
+          marginTop: 10,
+          padding: 10,
+          borderRadius: 4,
+          background: "#1c1c1c",
+          border: "1px solid #333",
+          fontSize: 13,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: 12,
+        }}
+      >
+        <StatBlock label="Боев" value={fights} />
+        <StatBlock label="Победы" value={s.wins} />
+        <StatBlock label="Поражения" value={s.losses} />
+        <StatBlock label="Winrate" value={`${winrate.toFixed(1)}%`} />
+        <StatBlock label="Киллы" value={s.kills} />
+        <StatBlock label="Смерти" value={s.deaths} />
+        <StatBlock label="K/D" value={kd.toFixed(2)} />
+        <StatBlock label="Ср. урон" value={s.avg_damage.toFixed(0)} />
+        <StatBlock label="Рейтинг" value={Math.round(s.rating)} />
+      </div>
+    );
+  }
+
+  const [activeIdx, setActiveIdx] = React.useState(0);
+  const safeIdx = Math.min(Math.max(activeIdx, 0), tabs.length - 1);
+  const active = tabs[safeIdx];
 
   return (
-    <div
-      style={{
-        marginTop: 10,
-        padding: 10,
-        borderRadius: 4,
-        background: "#1c1c1c",
-        border: "1px solid #333",
-        fontSize: 13,
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-        gap: 12,
-      }}
-    >
-      <StatBlock label="Боев" value={fights} />
-      <StatBlock label="Победы" value={s.wins} />
-      <StatBlock label="Поражения" value={s.losses} />
-      <StatBlock label="Winrate" value={`${winrate.toFixed(1)}%`} />
-      <StatBlock label="Киллы" value={s.kills} />
-      <StatBlock label="Смерти" value={s.deaths} />
-      <StatBlock label="K/D" value={kd.toFixed(2)} />
-      <StatBlock label="Ср. урон" value={s.avg_damage.toFixed(0)} />
-      <StatBlock label="Рейтинг" value={Math.round(s.rating)} />
+    <div style={{ marginTop: 10 }}>
+      {/* Вкладки режимов рейтинга */}
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          marginBottom: 8,
+          borderBottom: "1px solid #333",
+          paddingBottom: 4,
+        }}
+      >
+        {tabs.map((t, idx) => {
+          const isActive = idx === safeIdx;
+          return (
+            <button
+              key={t.id || idx}
+              type="button"
+              onClick={() => setActiveIdx(idx)}
+              style={{
+                border: "none",
+                cursor: "pointer",
+                padding: "4px 10px",
+                borderRadius: 4,
+                fontSize: 12,
+                backgroundColor: isActive ? "#2e7d32" : "transparent",
+                color: isActive ? "#fff" : "#ddd",
+              }}
+            >
+              {t.name || t.id}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Две таблицы: игроки слева, оружие справа */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "3fr 2fr",
+          gap: 10,
+        }}
+      >
+        {/* Игроки */}
+        <div
+          style={{
+            borderRadius: 4,
+            background: "#1c1c1c",
+            border: "1px solid #333",
+            padding: 6,
+          }}
+        >
+          <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.9 }}>
+            Игроки — {active.name}
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: 11,
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={thStyleCentered}>#</th>
+                  <th style={thStyle}>Никнейм</th>
+                  <th style={thStyleCentered}>Рейтинг</th>
+                  <th style={thStyleCentered}>Бои</th>
+                  <th style={thStyleCentered}>Убил</th>
+                  <th style={thStyleCentered}>Убит</th>
+                  <th style={thStyleCentered}>K/D</th>
+                  <th style={thStyleCentered}>Ср. урон</th>
+                  <th style={thStyleCentered}>Ср. очки</th>
+                  <th style={thStyleCentered}>MVP</th>
+                  <th style={thStyleCentered}>W/R</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(active.players || []).map((p, idx) => (
+                  <tr
+                    key={p.nickname + idx}
+                    style={{
+                      backgroundColor:
+                        idx % 2 === 1
+                          ? "rgba(255,255,255,0.02)"
+                          : "transparent",
+                    }}
+                  >
+                    <td style={tdStyleCentered}>{p.place}</td>
+                    <td style={tdStyle}>{p.nickname}</td>
+                    <td style={tdStyleCentered}>{Math.round(p.rating)}</td>
+                    <td style={tdStyleCentered}>{p.games}</td>
+                    <td style={tdStyleCentered}>{p.kills}</td>
+                    <td style={tdStyleCentered}>{p.deaths}</td>
+                    <td style={tdStyleCentered}>{p.kd.toFixed(2)}</td>
+                    <td style={tdStyleCentered}>
+                      {Math.round(p.avg_damage)}
+                    </td>
+                    <td style={tdStyleCentered}>
+                      {Math.round(p.avg_score)}
+                    </td>
+                    <td style={tdStyleCentered}>{p.mvp}</td>
+                    <td style={tdStyleCentered}>
+                      {p.wr_percent.toFixed(0)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Оружие */}
+        <div
+          style={{
+            borderRadius: 4,
+            background: "#1c1c1c",
+            border: "1px solid #333",
+            padding: 6,
+          }}
+        >
+          <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.9 }}>
+            Оружие — {active.name}
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: 11,
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={thStyle}>Оружие</th>
+                  <th style={thStyleCentered}>Исп.</th>
+                  <th style={thStyleCentered}>W/R%</th>
+                  <th style={thStyleCentered}>Ср. урон</th>
+                  <th style={thStyleCentered}>Ср. фраги</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(active.weapons || []).map((w, idx) => (
+                  <tr
+                    key={w.name + idx}
+                    style={{
+                      backgroundColor:
+                        idx % 2 === 1
+                          ? "rgba(255,255,255,0.02)"
+                          : "transparent",
+                    }}
+                  >
+                    <td style={tdStyle}>{w.name}</td>
+                    <td style={tdStyleCentered}>{w.users}</td>
+                    <td style={tdStyleCentered}>
+                      {w.wr_percent.toFixed(0)}%
+                    </td>
+                    <td style={tdStyleCentered}>
+                      {Math.round(w.avg_damage)}
+                    </td>
+                    <td style={tdStyleCentered}>
+                      {w.avg_kills.toFixed(1)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

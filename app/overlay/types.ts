@@ -58,5 +58,38 @@ export interface SessionResponseDto {
   nickname: string;
   session: SessionSummaryDto;
   fights: FightDto[];
+  rating_tabs?: RatingTabDto[];
+}
+
+export interface RatingPlayerRowDto {
+  nickname: string;
+  place: number;
+  rating: number;
+  games: number;
+  kills: number;
+  deaths: number;
+  kd: number;
+  avg_damage: number;
+  avg_score: number;
+  mvp: number;
+  wins: number;
+  losses: number;
+  wr_percent: number;
+}
+
+export interface RatingWeaponRowDto {
+  name: string;
+  users: number;
+  wr_percent: number;
+  avg_damage: number;
+  avg_kills: number;
+}
+
+export interface RatingTabDto {
+  id: string;
+  name: string;
+  is_custom: boolean;
+  players: RatingPlayerRowDto[];
+  weapons: RatingWeaponRowDto[];
 }
 
