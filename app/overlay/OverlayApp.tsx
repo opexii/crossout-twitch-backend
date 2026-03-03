@@ -668,7 +668,7 @@ function PlayersTable({
                       <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
                     )}
                   </td>
-                  <td style={tdStyleCentered}>
+                  <td style={tdStyle}>
                     {p.weapons && p.weapons.length
                       ? p.weapons.join(", ")
                       : p.weapons_def.join(", ")}
@@ -693,7 +693,7 @@ function PlayersTable({
                     {Math.round(p.damage_received)}
                   </td>
                   <td style={tdStyleCentered}>{Math.round(p.damage_dealt)}</td>
-                  <td style={tdStyleCentered}>
+                  <td style={{ ...tdStyle, textAlign: "right" }}>
                     {p.weapons && p.weapons.length
                       ? p.weapons.join(", ")
                       : p.weapons_def.join(", ")}
@@ -824,6 +824,7 @@ function PlayerDetailsPanel({
               style={{
                 maxHeight: 120,
                 overflowY: "auto",
+                paddingRight: 6,
               }}
             >
               <div
@@ -888,6 +889,7 @@ function PlayerDetailsPanel({
               style={{
                 maxHeight: 120,
                 overflowY: "auto",
+                paddingRight: 6,
               }}
             >
               <div
