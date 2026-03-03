@@ -48,6 +48,8 @@ export type SessionPayload = {
       score: number;
       weapons_def: string[];
       weapons: string[];
+      // Строка вида "Тошнитель(556), Обрез(5465), Циркулярка(444), Таран(879)"
+      weapons_with_damage?: string;
       is_self: boolean;
       placement?: number;
       damage_to_players?: Record<string, number>;

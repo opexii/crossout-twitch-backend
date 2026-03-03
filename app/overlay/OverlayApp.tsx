@@ -633,7 +633,7 @@ function PlayersTable({
               <th style={thStyleCentered}>Получил</th>
               <th style={thStyleCentered}>Урон</th>
               <th style={thStyleCentered}>Оружие</th>
-              <th style={thStyle}>Игрок</th>
+              <th style={{ ...thStyle, textAlign: "right" }}>Игрок</th>
             </>
           )}
         </tr>
@@ -765,9 +765,10 @@ function PlayerDetailsPanel({
           <div style={{ fontWeight: 600 }}>{player.nickname}</div>
           <div style={{ opacity: 0.8 }}>
             Оружие:{" "}
-            {player.weapons?.length
-              ? player.weapons.join(", ")
-              : player.weapons_def.join(", ") || "—"}
+            {(player as any).weapons_with_damage ||
+              (player.weapons?.length
+                ? player.weapons.join(", ")
+                : player.weapons_def.join(", ") || "—")}
           </div>
         </div>
         <div>
@@ -838,7 +839,7 @@ function PlayerDetailsPanel({
                 }}
               >
                 <span>Игрок</span>
-                <span>Урон</span>
+                <span style={{ textAlign: "center" }}>Урон</span>
               </div>
               {damageTargets.map(([nick, dmg], idx) => (
                 <div
@@ -858,7 +859,7 @@ function PlayerDetailsPanel({
                   <span
                     style={{
                       fontWeight: 500,
-                      textAlign: "left",
+                      textAlign: "center",
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
@@ -903,7 +904,7 @@ function PlayerDetailsPanel({
                 }}
               >
                 <span>Игрок</span>
-                <span>Урон</span>
+                <span style={{ textAlign: "center" }}>Урон</span>
               </div>
               {incomingTargets.map(([nick, dmg], idx) => (
                 <div
@@ -923,7 +924,7 @@ function PlayerDetailsPanel({
                   <span
                     style={{
                       fontWeight: 500,
-                      textAlign: "left",
+                      textAlign: "center",
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
