@@ -352,15 +352,15 @@ function FightsTable({
       >
         <thead style={{ background: "#222" }}>
           <tr>
-            <th style={thStyle}>#</th>
+            <th style={thStyleCentered}>#</th>
             <th style={thStyle}>Карта</th>
             <th style={thStyle}>Режим</th>
             <th style={thStyle}>Результат</th>
-            <th style={thStyle}>Киллы</th>
-            <th style={thStyle}>Смерти</th>
-            <th style={thStyle}>Урон</th>
-            <th style={thStyle}>Очки</th>
-            <th style={thStyle}>Время</th>
+            <th style={thStyleCentered}>Киллы</th>
+            <th style={thStyleCentered}>Смерти</th>
+            <th style={thStyleCentered}>Урон</th>
+            <th style={thStyleCentered}>Очки</th>
+            <th style={thStyleCentered}>Время</th>
           </tr>
         </thead>
         <tbody>
@@ -404,6 +404,11 @@ const thStyle: React.CSSProperties = {
   borderBottom: "1px solid #333",
   textAlign: "left",
   whiteSpace: "nowrap",
+};
+
+const thStyleCentered: React.CSSProperties = {
+  ...thStyle,
+  textAlign: "center",
 };
 
 const tdStyle: React.CSSProperties = {
@@ -610,24 +615,24 @@ function PlayersTable({
           {!alignRight && (
             <>
               <th style={thStyle}>Игрок</th>
-              <th style={thStyle}>Оружие</th>
-              <th style={thStyle}>Урон</th>
-              <th style={thStyle}>Получил</th>
-              <th style={thStyle}>K</th>
-              <th style={thStyle}>D</th>
-              <th style={thStyle}>Очки</th>
-              <th style={thStyle}>ОМ</th>
+              <th style={thStyleCentered}>Оружие</th>
+              <th style={thStyleCentered}>Урон</th>
+              <th style={thStyleCentered}>Получил</th>
+              <th style={thStyleCentered}>K</th>
+              <th style={thStyleCentered}>D</th>
+              <th style={thStyleCentered}>Очки</th>
+              <th style={thStyleCentered}>ОМ</th>
             </>
           )}
           {alignRight && (
             <>
-              <th style={thStyle}>ОМ</th>
-              <th style={thStyle}>Очки</th>
-              <th style={thStyle}>D</th>
-              <th style={thStyle}>K</th>
-              <th style={thStyle}>Получил</th>
-              <th style={thStyle}>Урон</th>
-              <th style={thStyle}>Оружие</th>
+              <th style={thStyleCentered}>ОМ</th>
+              <th style={thStyleCentered}>Очки</th>
+              <th style={thStyleCentered}>D</th>
+              <th style={thStyleCentered}>K</th>
+              <th style={thStyleCentered}>Получил</th>
+              <th style={thStyleCentered}>Урон</th>
+              <th style={thStyleCentered}>Оружие</th>
               <th style={thStyle}>Игрок</th>
             </>
           )}
@@ -832,7 +837,7 @@ function PlayerDetailsPanel({
                 }}
               >
                 <span>Игрок</span>
-                <span style={{ textAlign: "right" }}>Урон</span>
+                <span>Урон</span>
               </div>
               {damageTargets.map(([nick, dmg], idx) => (
                 <div
@@ -852,7 +857,7 @@ function PlayerDetailsPanel({
                   <span
                     style={{
                       fontWeight: 500,
-                      textAlign: "right",
+                      textAlign: "left",
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
@@ -896,7 +901,7 @@ function PlayerDetailsPanel({
                 }}
               >
                 <span>Игрок</span>
-                <span style={{ textAlign: "right" }}>Урон</span>
+                <span>Урон</span>
               </div>
               {incomingTargets.map(([nick, dmg], idx) => (
                 <div
@@ -916,7 +921,7 @@ function PlayerDetailsPanel({
                   <span
                     style={{
                       fontWeight: 500,
-                      textAlign: "right",
+                      textAlign: "left",
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
