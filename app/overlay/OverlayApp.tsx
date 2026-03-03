@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type React from "react";
+import React, { useEffect, useState } from "react";
 import { fetchSession } from "./api";
 import { onChannelIdReady } from "./twitch";
 import type { SessionResponseDto, FightDto, PlayerDto } from "./types";
@@ -314,7 +313,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
     );
   }
 
-  const [activeIdx, setActiveIdx] = React.useState(0);
+  const [activeIdx, setActiveIdx] = useState(0);
   const safeIdx = Math.min(Math.max(activeIdx, 0), tabs.length - 1);
   const active = tabs[safeIdx];
 
