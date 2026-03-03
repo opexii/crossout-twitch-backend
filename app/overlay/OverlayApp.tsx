@@ -812,7 +812,7 @@ function PlayerDetailsPanel({
                 letterSpacing: 0.5,
               }}
             >
-              Урон по
+              Нанес урон:
             </div>
             <div
               style={{
@@ -824,8 +824,9 @@ function PlayerDetailsPanel({
                 <div
                   key={nick}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
+                    display: "grid",
+                    gridTemplateColumns: "minmax(0, 1fr) 60px",
+                    columnGap: 6,
                     borderBottom: "1px solid #222",
                     padding: "2px 4px",
                     backgroundColor:
@@ -834,7 +835,13 @@ function PlayerDetailsPanel({
                   }}
                 >
                   <span>{nick}</span>
-                  <span style={{ fontWeight: 500, textAlign: "right" }}>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
                     {Math.round(dmg)}
                   </span>
                 </div>
@@ -868,8 +875,9 @@ function PlayerDetailsPanel({
                 <div
                   key={nick}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
+                    display: "grid",
+                    gridTemplateColumns: "minmax(0, 1fr) 60px",
+                    columnGap: 6,
                     borderBottom: "1px solid #222",
                     padding: "2px 4px",
                     backgroundColor:
@@ -878,7 +886,13 @@ function PlayerDetailsPanel({
                   }}
                 >
                   <span>{nick}</span>
-                  <span style={{ fontWeight: 500, textAlign: "right" }}>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
                     {Math.round(dmg)}
                   </span>
                 </div>
