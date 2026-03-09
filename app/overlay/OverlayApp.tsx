@@ -860,67 +860,97 @@ function FightsTable({
     );
   }
 
+  const rowH = 24;
+  const headerH = 28;
+  const maxVisibleRows = 10;
+  const shouldScroll = fights.length > maxVisibleRows;
+
+  const formatFightDuration = (seconds: number) => {
+    const total = Math.max(0, Math.round(seconds || 0));
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  };
+
   return (
     <div
       style={{
         marginTop: 8,
         borderRadius: 4,
-        overflow: "hidden",
         border: "1px solid #333",
       }}
     >
-      <table
+      <div
         style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          fontSize: 12,
+          overflowY: shouldScroll ? "auto" : "visible",
+          maxHeight: shouldScroll ? headerH + rowH * maxVisibleRows : undefined,
+          borderRadius: 4,
         }}
       >
-        <thead style={{ background: "#222" }}>
-          <tr>
-            <th style={thStyleCentered}>#</th>
-            <th style={thStyle}>Карта</th>
-            <th style={thStyle}>Режим</th>
-            <th style={thStyle}>Результат</th>
-            <th style={thStyleCentered}>Киллы</th>
-            <th style={thStyleCentered}>Смерти</th>
-            <th style={thStyleCentered}>Урон</th>
-            <th style={thStyleCentered}>Очки</th>
-            <th style={thStyleCentered}>Время</th>
-          </tr>
-        </thead>
-        <tbody>
-          {fights.map((f, idx) => {
-            const isWin = f.is_win === true;
-            const isSelected = idx === selectedIndex;
-            const bgBase = isWin
-              ? "rgba(46, 125, 50, 0.18)"
-              : "rgba(211, 47, 47, 0.18)";
-            const bg = isSelected ? "rgba(255,255,255,0.15)" : bgBase;
-            const resultText =
-              f.is_win === true ? "Победа" : f.is_win === false ? "Поражение" : "—";
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            fontSize: 12,
+          }}
+        >
+          <thead
+            style={{
+              background: "#222",
+              position: "sticky",
+              top: 0,
+              zIndex: 1,
+            }}
+          >
+            <tr>
+              <th style={thStyleCentered}>#</th>
+              <th style={thStyle}>Карта</th>
+              <th style={thStyle}>Режим</th>
+              <th style={thStyle}>Результат</th>
+              <th style={thStyleCentered}>Киллы</th>
+              <th style={thStyleCentered}>Смерти</th>
+              <th style={thStyleCentered}>Урон</th>
+              <th style={thStyleCentered}>Очки</th>
+              <th style={thStyleCentered}>Время</th>
+            </tr>
+          </thead>
+          <tbody>
+            {fights.map((f, idx) => {
+              const isWin = f.is_win === true;
+              const isSelected = idx === selectedIndex;
+              const bgBase = isWin
+                ? "rgba(46, 125, 50, 0.18)"
+                : "rgba(211, 47, 47, 0.18)";
+              const bg = isSelected ? "rgba(255,255,255,0.15)" : bgBase;
+              const resultText =
+                f.is_win === true
+                  ? "Победа"
+                  : f.is_win === false
+                    ? "Поражение"
+                    : "—";
 
-            const fightNumber = fights.length - idx;
-            return (
-              <tr
-                key={idx}
-                style={{ background: bg, cursor: "pointer" }}
-                onClick={() => onSelect(idx)}
-              >
-                <td style={tdStyleCentered}>{fightNumber}</td>
-                <td style={tdStyle}>{f.map || "—"}</td>
-                <td style={tdStyle}>{f.mode || "—"}</td>
-                <td style={tdStyle}>{resultText}</td>
-                <td style={tdStyleCentered}>{f.kills}</td>
-                <td style={tdStyleCentered}>{f.deaths}</td>
-                <td style={tdStyleCentered}>{Math.round(f.damage)}</td>
-                <td style={tdStyleCentered}>{f.score}</td>
-                <td style={tdStyleCentered}>{f.duration.toFixed(1)} c</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              const fightNumber = fights.length - idx;
+              return (
+                <tr
+                  key={idx}
+                  style={{ background: bg, cursor: "pointer" }}
+                  onClick={() => onSelect(idx)}
+                >
+                  <td style={tdStyleCentered}>{fightNumber}</td>
+                  <td style={tdStyle}>{f.map || "—"}</td>
+                  <td style={tdStyle}>{f.mode || "—"}</td>
+                  <td style={tdStyle}>{resultText}</td>
+                  <td style={tdStyleCentered}>{f.kills}</td>
+                  <td style={tdStyleCentered}>{f.deaths}</td>
+                  <td style={tdStyleCentered}>{Math.round(f.damage)}</td>
+                  <td style={tdStyleCentered}>{f.score}</td>
+                  <td style={tdStyleCentered}>{formatFightDuration(f.duration)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
