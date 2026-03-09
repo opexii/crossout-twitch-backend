@@ -69,6 +69,8 @@ export interface RatingPlayerRowDto {
   rating: number;
   /** Изменение рейтинга относительно предыдущей отправки: >0 набор, <0 потеря */
   delta?: number;
+  /** Оружие(я), на котором игрок играл (для выбранного режима) */
+  weapons?: string[];
   games: number;
   kills: number;
   deaths: number;
@@ -84,6 +86,8 @@ export interface RatingPlayerRowDto {
 export interface RatingWeaponRowDto {
   name: string;
   users: number;
+  /** Список игроков, которые использовали это оружие (для выбранного режима) */
+  players?: string[];
   wr_percent: number;
   avg_damage: number;
   avg_kills: number;

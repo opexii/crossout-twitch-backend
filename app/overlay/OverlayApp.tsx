@@ -315,14 +315,35 @@ function RatingView({ session }: { session: SessionResponseDto }) {
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [search, setSearch] = useState("");
+  const [selectedNick, setSelectedNick] = useState<string | null>(null);
+  const [selectedWeapon, setSelectedWeapon] = useState<string | null>(null);
   const safeIdx = Math.min(Math.max(activeIdx, 0), tabs.length - 1);
   const active = tabs[safeIdx];
 
+  useEffect(() => {
+    setSelectedNick(null);
+    setSelectedWeapon(null);
+  }, [safeIdx]);
+
   const norm = search.trim().toLowerCase();
   const allPlayers = active.players || [];
-  const filteredPlayers = norm
+  const filteredPlayersBase = norm
     ? allPlayers.filter((p) => p.nickname.toLowerCase().includes(norm))
     : allPlayers;
+  const filteredPlayers = selectedWeapon
+    ? filteredPlayersBase.filter((p) =>
+        (p.weapons || []).includes(selectedWeapon),
+      )
+    : filteredPlayersBase;
+
+  const allWeapons = active.weapons || [];
+  const filteredWeapons = selectedNick
+    ? allWeapons.filter((w) => (w.players || []).includes(selectedNick))
+    : allWeapons;
+
+  const selectedPlayer = selectedNick
+    ? allPlayers.find((p) => p.nickname === selectedNick) || null
+    : null;
 
   return (
     <div style={{ marginTop: 10 }}>
@@ -387,6 +408,27 @@ function RatingView({ session }: { session: SessionResponseDto }) {
         <span style={{ opacity: 0.7 }}>
           Игроков: {filteredPlayers.length}/{allPlayers.length}
         </span>
+        {(selectedNick || selectedWeapon) && (
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedNick(null);
+              setSelectedWeapon(null);
+            }}
+            style={{
+              marginLeft: "auto",
+              border: "1px solid #444",
+              background: "transparent",
+              color: "#ddd",
+              borderRadius: 4,
+              padding: "2px 8px",
+              cursor: "pointer",
+              fontSize: 12,
+            }}
+          >
+            Сбросить выбор
+          </button>
+        )}
       </div>
 
       {/* Две таблицы: игроки слева, оружие справа */}
@@ -408,6 +450,12 @@ function RatingView({ session }: { session: SessionResponseDto }) {
         >
           <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.9 }}>
             Игроки — {active.name}
+            {selectedWeapon ? (
+              <span style={{ opacity: 0.75 }}>
+                {" "}
+                (фильтр: оружие “{selectedWeapon}”)
+              </span>
+            ) : null}
           </div>
           <div style={{ overflowX: "auto" }}>
             <table
@@ -446,17 +494,27 @@ function RatingView({ session }: { session: SessionResponseDto }) {
                           : "transparent";
                   const deltaStr =
                     delta > 0 ? `+${delta}` : delta < 0 ? String(delta) : "";
+                  const isSelected = selectedNick === p.nickname;
                   return (
                     <tr
                       key={p.nickname + idx}
                       style={{
-                        backgroundColor: rowBg,
+                        backgroundColor: isSelected
+                          ? "rgba(255,255,255,0.08)"
+                          : rowBg,
                         color:
                           delta > 0
                             ? "#90EE90"
                             : delta < 0
                               ? "#ffb3b3"
                               : undefined,
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setSelectedWeapon(null);
+                        setSelectedNick((prev) =>
+                          prev === p.nickname ? null : p.nickname,
+                        );
                       }}
                     >
                       <td style={tdStyleCentered}>{p.place}</td>
@@ -496,6 +554,16 @@ function RatingView({ session }: { session: SessionResponseDto }) {
         >
           <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.9 }}>
             Оружие — {active.name}
+            {selectedNick ? (
+              <span style={{ opacity: 0.75 }}>
+                {" "}
+                (игрок: {selectedNick}
+                {selectedPlayer?.weapons?.length
+                  ? ` — ${selectedPlayer.weapons.join(", ")}`
+                  : ""}
+                )
+              </span>
+            ) : null}
           </div>
           <div style={{ overflowX: "auto" }}>
             <table
@@ -515,29 +583,40 @@ function RatingView({ session }: { session: SessionResponseDto }) {
                 </tr>
               </thead>
               <tbody>
-                {(active.weapons || []).map((w, idx) => (
-                  <tr
-                    key={w.name + idx}
-                    style={{
-                      backgroundColor:
-                        idx % 2 === 1
-                          ? "rgba(255,255,255,0.02)"
-                          : "transparent",
-                    }}
-                  >
-                    <td style={tdStyle}>{w.name}</td>
-                    <td style={tdStyleCentered}>{w.users}</td>
-                    <td style={tdStyleCentered}>
-                      {w.wr_percent.toFixed(0)}%
-                    </td>
-                    <td style={tdStyleCentered}>
-                      {Math.round(w.avg_damage)}
-                    </td>
-                    <td style={tdStyleCentered}>
-                      {w.avg_kills.toFixed(1)}
-                    </td>
-                  </tr>
-                ))}
+                {filteredWeapons.map((w, idx) => {
+                  const isSelected = selectedWeapon === w.name;
+                  return (
+                    <tr
+                      key={w.name + idx}
+                      style={{
+                        backgroundColor: isSelected
+                          ? "rgba(255,255,255,0.08)"
+                          : idx % 2 === 1
+                            ? "rgba(255,255,255,0.02)"
+                            : "transparent",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setSelectedNick(null);
+                        setSelectedWeapon((prev) =>
+                          prev === w.name ? null : w.name,
+                        );
+                      }}
+                    >
+                      <td style={tdStyle}>{w.name}</td>
+                      <td style={tdStyleCentered}>{w.users}</td>
+                      <td style={tdStyleCentered}>
+                        {w.wr_percent.toFixed(0)}%
+                      </td>
+                      <td style={tdStyleCentered}>
+                        {Math.round(w.avg_damage)}
+                      </td>
+                      <td style={tdStyleCentered}>
+                        {w.avg_kills.toFixed(1)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
