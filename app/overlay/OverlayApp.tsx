@@ -108,7 +108,26 @@ export function OverlayApp() {
 
       {data && (
         <>
-          <SessionHeader session={data} />
+          {(() => {
+            const fights = data.fights || [];
+            const ordered = [...fights].reverse(); // новые сверху (как в HistoryView)
+            const clampedIndex =
+              ordered.length > 0
+                ? Math.min(
+                    Math.max(selectedFightIndex, 0),
+                    ordered.length - 1,
+                  )
+                : 0;
+            const selectedFight =
+              ordered.length > 0 ? ordered[clampedIndex] : null;
+            return (
+              <SessionHeader
+                session={data}
+                activeTab={activeTab}
+                selectedFight={selectedFight}
+              />
+            );
+          })()}
 
           <Tabs active={activeTab} onChange={setActiveTab} />
 
@@ -127,10 +146,24 @@ export function OverlayApp() {
   );
 }
 
-function SessionHeader({ session }: { session: SessionResponseDto }) {
+function SessionHeader({
+  session,
+  activeTab,
+  selectedFight,
+}: {
+  session: SessionResponseDto;
+  activeTab: TabId;
+  selectedFight: FightDto | null;
+}) {
   const s = session.session;
   const winrate =
     s.wins + s.losses > 0 ? (s.wins / (s.wins + s.losses)) * 100 : 0;
+  const durationSeconds =
+    activeTab === "history" && selectedFight
+      ? selectedFight.duration
+      : s.duration_seconds;
+  const durationLabel =
+    activeTab === "history" && selectedFight ? "Время боя" : "Время в боях";
 
   return (
     <div
@@ -181,10 +214,10 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
         </div>
         <div>
           <div>
-            Рейтинг: <strong>{Math.round(s.rating)}</strong>
+            Рейтинг (оценка): <strong>{Math.round(s.rating)}</strong>
           </div>
           <div style={{ opacity: 0.8 }}>
-            Длительность: {formatDuration(s.duration_seconds)}
+            {durationLabel}: {formatDuration(durationSeconds)}
           </div>
         </div>
       </div>
