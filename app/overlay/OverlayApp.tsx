@@ -355,16 +355,28 @@ function RatingView({ session }: { session: SessionResponseDto }) {
 
   const norm = search.trim().toLowerCase();
   const allPlayers = active.players || [];
-  const filteredPlayersBase = norm
-    ? allPlayers.filter((p) => p.nickname.toLowerCase().includes(norm))
-    : allPlayers;
-  const filteredPlayersWithSelection = selectedWeapon
-    ? filteredPlayersBase.filter((p) =>
-        (p.weapons || []).includes(selectedWeapon),
-      )
-    : filteredPlayersBase;
+  const allWeapons = active.weapons || [];
+  const selectedWeaponRow = selectedWeapon
+    ? allWeapons.find((w) => w.name === selectedWeapon) || null
+    : null;
 
-  const filteredPlayers = [...filteredPlayersWithSelection].sort((a, b) => {
+  let playersBase = allPlayers;
+  if (selectedWeapon) {
+    if (selectedWeaponRow?.player_rows?.length) {
+      playersBase = selectedWeaponRow.player_rows;
+    } else {
+      // fallback для старых payload: только фильтр по списку оружия игрока
+      playersBase = allPlayers.filter((p) =>
+        (p.weapons || []).includes(selectedWeapon),
+      );
+    }
+  }
+
+  const filteredPlayersWithSearch = norm
+    ? playersBase.filter((p) => p.nickname.toLowerCase().includes(norm))
+    : playersBase;
+
+  const filteredPlayers = [...filteredPlayersWithSearch].sort((a, b) => {
     const dir = playerSort.dir === "asc" ? 1 : -1;
     const k = playerSort.key;
     if (k === "nickname") {
@@ -387,7 +399,6 @@ function RatingView({ session }: { session: SessionResponseDto }) {
     return (Number(av) - Number(bv)) * dir;
   });
 
-  const allWeapons = active.weapons || [];
   const filteredWeaponsWithSelection = selectedNick
     ? allWeapons.filter((w) => (w.players || []).includes(selectedNick))
     : allWeapons;

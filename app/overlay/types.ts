@@ -88,6 +88,8 @@ export interface RatingWeaponRowDto {
   users: number;
   /** Список игроков, которые использовали это оружие (для выбранного режима) */
   players?: string[];
+  /** Статы игроков по этому оружию (для сортировки в оверлее при выборе оружия) */
+  player_rows?: RatingPlayerRowDto[];
   wr_percent: number;
   avg_damage: number;
   avg_kills: number;
