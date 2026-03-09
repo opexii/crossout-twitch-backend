@@ -930,6 +930,11 @@ function FightsTable({
                     : "—";
 
               const fightNumber = fights.length - idx;
+            const self = (f.players || []).find((p) => p.is_self);
+            const fightKills = self ? self.kills : f.kills;
+            const fightDeaths = self ? self.deaths : f.deaths;
+            const fightDamage = self ? self.damage_dealt : f.damage;
+            const fightScore = self ? self.score : f.score;
               return (
                 <tr
                   key={idx}
@@ -940,10 +945,10 @@ function FightsTable({
                   <td style={tdStyle}>{f.map || "—"}</td>
                   <td style={tdStyle}>{f.mode || "—"}</td>
                   <td style={tdStyle}>{resultText}</td>
-                  <td style={tdStyleCentered}>{f.kills}</td>
-                  <td style={tdStyleCentered}>{f.deaths}</td>
-                  <td style={tdStyleCentered}>{Math.round(f.damage)}</td>
-                  <td style={tdStyleCentered}>{f.score}</td>
+                <td style={tdStyleCentered}>{fightKills}</td>
+                <td style={tdStyleCentered}>{fightDeaths}</td>
+                <td style={tdStyleCentered}>{Math.round(fightDamage)}</td>
+                <td style={tdStyleCentered}>{fightScore}</td>
                   <td style={tdStyleCentered}>{formatFightDuration(f.duration)}</td>
                 </tr>
               );
