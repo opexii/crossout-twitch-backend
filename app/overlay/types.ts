@@ -67,6 +67,8 @@ export interface RatingPlayerRowDto {
   nickname: string;
   place: number;
   rating: number;
+  /** Изменение рейтинга относительно предыдущей отправки: >0 набор, <0 потеря */
+  delta?: number;
   games: number;
   kills: number;
   deaths: number;

@@ -422,6 +422,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
                   <th style={thStyleCentered}>#</th>
                   <th style={thStyle}>Никнейм</th>
                   <th style={thStyleCentered}>Рейтинг</th>
+                  <th style={thStyleCentered}>Δ</th>
                   <th style={thStyleCentered}>Бои</th>
                   <th style={thStyleCentered}>Убил</th>
                   <th style={thStyleCentered}>Убит</th>
@@ -433,35 +434,52 @@ function RatingView({ session }: { session: SessionResponseDto }) {
                 </tr>
               </thead>
               <tbody>
-                {filteredPlayers.map((p, idx) => (
-                  <tr
-                    key={p.nickname + idx}
-                    style={{
-                      backgroundColor:
-                        idx % 2 === 1
+                {filteredPlayers.map((p, idx) => {
+                  const delta = p.delta ?? 0;
+                  const rowBg =
+                    delta > 0
+                      ? "#1e3d1e"
+                      : delta < 0
+                        ? "#3d1e1e"
+                        : idx % 2 === 1
                           ? "rgba(255,255,255,0.02)"
-                          : "transparent",
-                    }}
-                  >
-                    <td style={tdStyleCentered}>{p.place}</td>
-                    <td style={tdStyle}>{p.nickname}</td>
-                    <td style={tdStyleCentered}>{Math.round(p.rating)}</td>
-                    <td style={tdStyleCentered}>{p.games}</td>
-                    <td style={tdStyleCentered}>{p.kills}</td>
-                    <td style={tdStyleCentered}>{p.deaths}</td>
-                    <td style={tdStyleCentered}>{p.kd.toFixed(2)}</td>
-                    <td style={tdStyleCentered}>
-                      {Math.round(p.avg_damage)}
-                    </td>
-                    <td style={tdStyleCentered}>
-                      {Math.round(p.avg_score)}
-                    </td>
-                    <td style={tdStyleCentered}>{p.mvp}</td>
-                    <td style={tdStyleCentered}>
-                      {p.wr_percent.toFixed(0)}%
-                    </td>
-                  </tr>
-                ))}
+                          : "transparent";
+                  const deltaStr =
+                    delta > 0 ? `+${delta}` : delta < 0 ? String(delta) : "";
+                  return (
+                    <tr
+                      key={p.nickname + idx}
+                      style={{
+                        backgroundColor: rowBg,
+                        color:
+                          delta > 0
+                            ? "#90EE90"
+                            : delta < 0
+                              ? "#ffb3b3"
+                              : undefined,
+                      }}
+                    >
+                      <td style={tdStyleCentered}>{p.place}</td>
+                      <td style={tdStyle}>{p.nickname}</td>
+                      <td style={tdStyleCentered}>{Math.round(p.rating)}</td>
+                      <td style={tdStyleCentered}>{deltaStr}</td>
+                      <td style={tdStyleCentered}>{p.games}</td>
+                      <td style={tdStyleCentered}>{p.kills}</td>
+                      <td style={tdStyleCentered}>{p.deaths}</td>
+                      <td style={tdStyleCentered}>{p.kd.toFixed(2)}</td>
+                      <td style={tdStyleCentered}>
+                        {Math.round(p.avg_damage)}
+                      </td>
+                      <td style={tdStyleCentered}>
+                        {Math.round(p.avg_score)}
+                      </td>
+                      <td style={tdStyleCentered}>{p.mvp}</td>
+                      <td style={tdStyleCentered}>
+                        {p.wr_percent.toFixed(0)}%
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
