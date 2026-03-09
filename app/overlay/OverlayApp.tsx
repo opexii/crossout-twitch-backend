@@ -132,6 +132,32 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
   const winrate =
     s.wins + s.losses > 0 ? (s.wins / (s.wins + s.losses)) * 100 : 0;
 
+  const weaponLabel = (() => {
+    const raw = (s.weapon_set || "").trim();
+    if (!raw || raw === "Неизвестно" || raw === "-") return "—";
+    const parts = raw
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const filtered = Array.from(
+      new Set(
+        parts.filter((p) => {
+          const v = p.trim();
+          if (!v || v === "Неизвестно" || v === "-") return false;
+          // Технические имена, которые не должны попадать в оверлей
+          if (v.startsWith("CarPart_")) return false;
+          if (v.startsWith("preset_")) return false;
+          if (v.includes(":")) return false;
+          return true;
+        }),
+      ),
+    );
+    if (filtered.length) return filtered.join(", ");
+    // Если всё отфильтровали, не показываем "CarPart_*"
+    if (raw.includes("CarPart_")) return "—";
+    return raw;
+  })();
+
   const ratingTabs = session.rating_tabs || [];
   const baseTab =
     ratingTabs.find((t) => t.id === "missions") || ratingTabs[0] || null;
@@ -162,7 +188,7 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
         <div>
           <div style={{ fontWeight: 600 }}>{session.nickname}</div>
           <div style={{ opacity: 0.8 }}>
-            Оружие: <span>{s.weapon_set || "—"}</span>
+            Оружие: <span>{weaponLabel}</span>
           </div>
         </div>
         <div>
@@ -1008,6 +1034,17 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
     selfPlayer ?? players[0] ?? null,
   );
 
+  const highlightVictims = (() => {
+    if (!selectedPlayer?.damage_to_players) return undefined;
+    const s = new Set<string>();
+    for (const [nick, dmg] of Object.entries(selectedPlayer.damage_to_players)) {
+      if (!nick || nick.includes(":")) continue;
+      if (!dmg || dmg <= 0) continue;
+      s.add(nick);
+    }
+    return s;
+  })();
+
   const team1: PlayerDto[] = [];
   const team2: PlayerDto[] = [];
   const unknown: PlayerDto[] = [];
@@ -1053,6 +1090,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           showPlacement
           selectedPlayer={selectedPlayer}
           onSelectPlayer={setSelectedPlayer}
+          highlightVictims={highlightVictims}
         />
         <PlayerDetailsPanel player={selectedPlayer} fight={fight} />
       </div>
@@ -1100,6 +1138,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           players={leftTeam}
           selectedPlayer={selectedPlayer}
           onSelectPlayer={setSelectedPlayer}
+          highlightVictims={highlightVictims}
         />
       </div>
       <div
@@ -1119,6 +1158,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           alignRight
           selectedPlayer={selectedPlayer}
           onSelectPlayer={setSelectedPlayer}
+          highlightVictims={highlightVictims}
         />
       </div>
       {unknown.length > 0 && (
@@ -1139,6 +1179,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
             players={unknown}
             selectedPlayer={selectedPlayer}
             onSelectPlayer={setSelectedPlayer}
+            highlightVictims={highlightVictims}
           />
         </div>
       )}
@@ -1160,6 +1201,7 @@ function PlayersTable({
   selectedPlayer,
   onSelectPlayer,
   alignRight = false,
+  highlightVictims,
 }: {
   fight: FightDto;
   players: PlayerDto[];
@@ -1167,10 +1209,22 @@ function PlayersTable({
   selectedPlayer?: PlayerDto | null;
   onSelectPlayer?: (p: PlayerDto) => void;
   alignRight?: boolean;
+  highlightVictims?: Set<string>;
 }) {
   if (!players.length) {
     return <div style={{ fontSize: 12, opacity: 0.7 }}>Нет данных.</div>;
   }
+
+  const displayWeapons = (p: PlayerDto) => {
+    const raw = p.weapons && p.weapons.length ? p.weapons : p.weapons_def;
+    const filtered = (raw || [])
+      .map((x) => String(x || "").trim())
+      .filter(Boolean)
+      .filter((v) => v !== "Неизвестно" && v !== "-")
+      .filter((v) => !v.startsWith("CarPart_") && !v.startsWith("preset_") && !v.includes(":"));
+    const unique = Array.from(new Set(filtered));
+    return unique.length ? unique.join(", ") : "—";
+  };
 
   return (
     <table
@@ -1217,15 +1271,23 @@ function PlayersTable({
           };
           const placeLabel =
             showPlacement && p.placement != null ? p.placement : idx + 1;
+          const isSelected =
+            selectedPlayer && selectedPlayer.nickname === p.nickname;
+          const isVictim =
+            !isSelected &&
+            highlightVictims &&
+            highlightVictims.has(p.nickname);
 
           return (
             <tr
               key={p.nickname + idx}
               style={{
                 backgroundColor:
-                  selectedPlayer && selectedPlayer.nickname === p.nickname
+                  isSelected
                     ? "rgba(255,255,255,0.08)"
-                    : "transparent",
+                    : isVictim
+                      ? "rgba(255,193,7,0.14)"
+                      : "transparent",
                 cursor: onSelectPlayer ? "pointer" : "default",
               }}
               onClick={() => onSelectPlayer?.(p)}
@@ -1240,9 +1302,7 @@ function PlayersTable({
                     )}
                   </td>
                   <td style={tdStyle}>
-                    {p.weapons && p.weapons.length
-                      ? p.weapons.join(", ")
-                      : p.weapons_def.join(", ")}
+                    {displayWeapons(p)}
                   </td>
                   <td style={tdStyleCentered}>{Math.round(p.damage_dealt)}</td>
                   <td style={tdStyleCentered}>
@@ -1265,9 +1325,7 @@ function PlayersTable({
                   </td>
                   <td style={tdStyleCentered}>{Math.round(p.damage_dealt)}</td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>
-                    {p.weapons && p.weapons.length
-                      ? p.weapons.join(", ")
-                      : p.weapons_def.join(", ")}
+                    {displayWeapons(p)}
                   </td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>
                     <span style={nameStyle}>{p.nickname}</span>
@@ -1515,9 +1573,10 @@ function PlayerDetailsPanel({
 }
 
 function formatDuration(seconds: number): string {
-  const s = Math.floor(seconds);
-  const m = Math.floor(s / 60);
-  const rest = s % 60;
-  return `${m}:${rest.toString().padStart(2, "0")}`;
+  const total = Math.max(0, Math.floor(seconds || 0));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
