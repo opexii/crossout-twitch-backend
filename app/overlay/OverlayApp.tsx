@@ -317,6 +317,34 @@ function RatingView({ session }: { session: SessionResponseDto }) {
   const [search, setSearch] = useState("");
   const [selectedNick, setSelectedNick] = useState<string | null>(null);
   const [selectedWeapon, setSelectedWeapon] = useState<string | null>(null);
+  type SortDir = "asc" | "desc";
+  type PlayerSortKey =
+    | "place"
+    | "nickname"
+    | "rating"
+    | "delta"
+    | "games"
+    | "kills"
+    | "deaths"
+    | "kd"
+    | "avg_damage"
+    | "avg_score"
+    | "mvp"
+    | "wr_percent";
+  type WeaponSortKey =
+    | "name"
+    | "users"
+    | "wr_percent"
+    | "avg_damage"
+    | "avg_kills";
+  const [playerSort, setPlayerSort] = useState<{
+    key: PlayerSortKey;
+    dir: SortDir;
+  }>({ key: "rating", dir: "desc" });
+  const [weaponSort, setWeaponSort] = useState<{
+    key: WeaponSortKey;
+    dir: SortDir;
+  }>({ key: "users", dir: "desc" }); // по умолчанию — по использованию
   const safeIdx = Math.min(Math.max(activeIdx, 0), tabs.length - 1);
   const active = tabs[safeIdx];
 
@@ -330,20 +358,64 @@ function RatingView({ session }: { session: SessionResponseDto }) {
   const filteredPlayersBase = norm
     ? allPlayers.filter((p) => p.nickname.toLowerCase().includes(norm))
     : allPlayers;
-  const filteredPlayers = selectedWeapon
+  const filteredPlayersWithSelection = selectedWeapon
     ? filteredPlayersBase.filter((p) =>
         (p.weapons || []).includes(selectedWeapon),
       )
     : filteredPlayersBase;
 
+  const filteredPlayers = [...filteredPlayersWithSelection].sort((a, b) => {
+    const dir = playerSort.dir === "asc" ? 1 : -1;
+    const k = playerSort.key;
+    if (k === "nickname") {
+      return (
+        a.nickname.localeCompare(b.nickname, "ru", { sensitivity: "base" }) * dir
+      );
+    }
+    const av =
+      k === "delta"
+        ? (a.delta ?? 0)
+        : k === "place"
+          ? a.place
+          : (a as any)[k] ?? 0;
+    const bv =
+      k === "delta"
+        ? (b.delta ?? 0)
+        : k === "place"
+          ? b.place
+          : (b as any)[k] ?? 0;
+    return (Number(av) - Number(bv)) * dir;
+  });
+
   const allWeapons = active.weapons || [];
-  const filteredWeapons = selectedNick
+  const filteredWeaponsWithSelection = selectedNick
     ? allWeapons.filter((w) => (w.players || []).includes(selectedNick))
     : allWeapons;
+  const filteredWeapons = [...filteredWeaponsWithSelection].sort((a, b) => {
+    const dir = weaponSort.dir === "asc" ? 1 : -1;
+    const k = weaponSort.key;
+    if (k === "name") {
+      return a.name.localeCompare(b.name, "ru", { sensitivity: "base" }) * dir;
+    }
+    const av = (a as any)[k] ?? 0;
+    const bv = (b as any)[k] ?? 0;
+    return (Number(av) - Number(bv)) * dir;
+  });
 
   const selectedPlayer = selectedNick
     ? allPlayers.find((p) => p.nickname === selectedNick) || null
     : null;
+
+  const arrow = (activeKey: string, activeDir: SortDir, key: string) =>
+    activeKey === key ? (activeDir === "desc" ? " ↓" : " ↑") : "";
+  const toggleSort = <T extends string>(
+    cur: { key: T; dir: SortDir },
+    key: T,
+    defaultDir: SortDir = "desc",
+  ): { key: T; dir: SortDir } => {
+    if (cur.key !== key) return { key, dir: defaultDir };
+    return { key, dir: cur.dir === "desc" ? "asc" : "desc" };
+  };
 
   return (
     <div style={{ marginTop: 10 }}>
@@ -467,18 +539,104 @@ function RatingView({ session }: { session: SessionResponseDto }) {
             >
               <thead>
                 <tr>
-                  <th style={thStyleCentered}>#</th>
-                  <th style={thStyle}>Никнейм</th>
-                  <th style={thStyleCentered}>Рейтинг</th>
-                  <th style={thStyleCentered}>Δ</th>
-                  <th style={thStyleCentered}>Бои</th>
-                  <th style={thStyleCentered}>Убил</th>
-                  <th style={thStyleCentered}>Убит</th>
-                  <th style={thStyleCentered}>K/D</th>
-                  <th style={thStyleCentered}>Ср. урон</th>
-                  <th style={thStyleCentered}>Ср. очки</th>
-                  <th style={thStyleCentered}>MVP</th>
-                  <th style={thStyleCentered}>W/R</th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "place", "asc"))
+                    }
+                  >
+                    #{arrow(playerSort.key, playerSort.dir, "place")}
+                  </th>
+                  <th
+                    style={{ ...thStyle, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "nickname", "asc"))
+                    }
+                  >
+                    Никнейм{arrow(playerSort.key, playerSort.dir, "nickname")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "rating", "desc"))
+                    }
+                  >
+                    Рейтинг{arrow(playerSort.key, playerSort.dir, "rating")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "delta", "desc"))
+                    }
+                  >
+                    Δ{arrow(playerSort.key, playerSort.dir, "delta")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "games", "desc"))
+                    }
+                  >
+                    Бои{arrow(playerSort.key, playerSort.dir, "games")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "kills", "desc"))
+                    }
+                  >
+                    Убил{arrow(playerSort.key, playerSort.dir, "kills")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "deaths", "desc"))
+                    }
+                  >
+                    Убит{arrow(playerSort.key, playerSort.dir, "deaths")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "kd", "desc"))
+                    }
+                  >
+                    K/D{arrow(playerSort.key, playerSort.dir, "kd")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "avg_damage", "desc"))
+                    }
+                  >
+                    Ср. урон{arrow(playerSort.key, playerSort.dir, "avg_damage")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "avg_score", "desc"))
+                    }
+                  >
+                    Ср. очки{arrow(playerSort.key, playerSort.dir, "avg_score")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(toggleSort(playerSort, "mvp", "desc"))
+                    }
+                  >
+                    MVP{arrow(playerSort.key, playerSort.dir, "mvp")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setPlayerSort(
+                        toggleSort(playerSort, "wr_percent", "desc"),
+                      )
+                    }
+                  >
+                    W/R{arrow(playerSort.key, playerSort.dir, "wr_percent")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -575,11 +733,52 @@ function RatingView({ session }: { session: SessionResponseDto }) {
             >
               <thead>
                 <tr>
-                  <th style={thStyle}>Оружие</th>
-                  <th style={thStyleCentered}>Исп.</th>
-                  <th style={thStyleCentered}>W/R%</th>
-                  <th style={thStyleCentered}>Ср. урон</th>
-                  <th style={thStyleCentered}>Ср. фраги</th>
+                  <th
+                    style={{ ...thStyle, cursor: "pointer" }}
+                    onClick={() =>
+                      setWeaponSort(toggleSort(weaponSort, "name", "asc"))
+                    }
+                  >
+                    Оружие{arrow(weaponSort.key, weaponSort.dir, "name")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setWeaponSort(toggleSort(weaponSort, "users", "desc"))
+                    }
+                  >
+                    Исп.{arrow(weaponSort.key, weaponSort.dir, "users")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setWeaponSort(
+                        toggleSort(weaponSort, "wr_percent", "desc"),
+                      )
+                    }
+                  >
+                    W/R%{arrow(weaponSort.key, weaponSort.dir, "wr_percent")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setWeaponSort(
+                        toggleSort(weaponSort, "avg_damage", "desc"),
+                      )
+                    }
+                  >
+                    Ср. урон{arrow(weaponSort.key, weaponSort.dir, "avg_damage")}
+                  </th>
+                  <th
+                    style={{ ...thStyleCentered, cursor: "pointer" }}
+                    onClick={() =>
+                      setWeaponSort(
+                        toggleSort(weaponSort, "avg_kills", "desc"),
+                      )
+                    }
+                  >
+                    Ср. фраги{arrow(weaponSort.key, weaponSort.dir, "avg_kills")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
