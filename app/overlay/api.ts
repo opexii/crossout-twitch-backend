@@ -1,8 +1,11 @@
 import type { SessionResponseDto } from "./types";
 
-// На Vercel фронтенд и backend работают на одном домене,
-// поэтому достаточно относительного пути.
-const BASE = "";
+// Next.js (Vercel): process.env. Для Vite (Twitch ZIP): import.meta.env — подставляется при сборке.
+const _base =
+  (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_OVERLAY_API_BASE as string) ||
+  (typeof process !== "undefined" && (process as any).env?.NEXT_PUBLIC_OVERLAY_API_BASE as string) ||
+  "";
+const BASE = _base.replace(/\/$/, "");
 
 export async function fetchSession(
   channelId: string,

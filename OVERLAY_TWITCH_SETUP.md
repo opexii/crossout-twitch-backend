@@ -129,3 +129,46 @@
 
 **Если оверлей показывает «Для этого канала нет активной сессии»:**  
 Проверьте, что в prser указан тот же Channel ID (для расширения — **числовой** ID), что backend доступен по указанному URL и что программа уже отправляла данные (выбран лог и игрок).
+
+---
+
+## Сборка ZIP для Twitch Hosted Test (тест на сервере)
+
+Оверлей собирается через **Vite** (без inline-скриптов), поэтому проходит CSP Twitch и корректно работает в режиме **«Тест на сервере»** (Hosted Test).
+
+1. **Собрать билд и ZIP** (в корне проекта `crossout-twitch-backend`):
+   ```bash
+   npm run build:twitch
+   ```
+   Скрипт собирает оверлей из папки `twitch-overlay` (Vite), создаёт `video_overlay.html` и `config.html` в `twitch-overlay/dist`, пакует в **twitch-extension.zip**. Оверлей обращается к backend по URL (по умолчанию `https://crossout-twitch-backend-gx73.vercel.app`). Свой URL:
+   ```bash
+   set OVERLAY_API_BASE=https://ваш-backend.vercel.app
+   npm run build:twitch
+   ```
+   (PowerShell: `$env:OVERLAY_API_BASE="https://..."; npm run build:twitch`.)
+
+2. **Загрузить ZIP в Twitch:**  
+   Консоль расширения → ваша версия → вкладка **Файлы** → **Upload Version Assets** → выберите **twitch-extension.zip**.
+
+3. **Пути на вкладке «Размещение материалов» (Asset Hosting):**
+   - **Видео: путь полноэкранного режима** — `video_overlay.html`.
+   - **Путь к конфигурации** — `config.html`.
+
+4. Нажать **«Переместить для тестирования на сервере»** на вкладке **Статус**. После этого запустите prser, выберите лог и игрока, включите тестовый стрим — данные в оверлее должны подгружаться с backend.
+
+### Ошибка «Refused to connect» / «violates Content Security Policy»
+
+В режиме **Тест на сервере** Twitch применяет CSP и по умолчанию запрещает запросы к сторонним доменам. Если в консоли браузера видно, что запрос к `https://ваш-backend.vercel.app/api/session/...` блокируется из‑за `connect-src`, нужно добавить домен backend в список разрешённых:
+
+1. Откройте [Twitch Developer Console](https://dev.twitch.tv/console) → ваше расширение → нужная **версия**.
+2. Перейдите в раздел **Capabilities** (Возможности).
+3. В поле **Allowlist for URL Fetching Domains** (или «Список доменов для запросов») добавьте полный URL вашего backend **без** пути, например:
+   - `https://crossout-twitch-backend-gx73.vercel.app`
+4. Сохраните версию. После этого запросы оверлея к этому домену будут разрешены CSP.
+
+### Если на стриме нет данных
+
+- Убедитесь, что в prser указан **числовой** Twitch Channel ID и Backend URL, и что данные отправляются (выбран лог и игрок).
+- Если в консоли есть ошибка CSP (connect-src) — добавьте домен backend в **Capabilities** → Allowlist for URL Fetching Domains (см. выше).
+- Если использовали старый билд (Next.js export) — пересоберите: `npm run build:twitch` и загрузите новый ZIP. Текущий билд (Vite) не использует inline-скрипты и должен работать в Hosted Test.
+- Альтернатива: **Локальный тест** — на вкладке «Размещение материалов» укажите **Базовый URI** вашего backend (например `https://crossout-twitch-backend-gx73.vercel.app/`), не загружайте ZIP; файлы будут браться с Vercel, оверлей получит channelId и данные.
