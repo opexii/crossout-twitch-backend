@@ -1,4 +1,5 @@
-import Script from "next/script";
+const TWITCH_HELPER_URL =
+  "https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js";
 
 export default function OverlayLayout({
   children,
@@ -7,11 +8,8 @@ export default function OverlayLayout({
 }) {
   return (
     <>
-      {/* Официальный скрипт Twitch Extension Helper — нужен, когда оверлей открыт во фрейме расширения */}
-      <Script
-        src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"
-        strategy="beforeInteractive"
-      />
+      {/* Скрипт в начальном HTML — иначе во фрейме Twitch "Extension Helper Library Not Loaded" */}
+      <script src={TWITCH_HELPER_URL} suppressHydrationWarning />
       {children}
     </>
   );
