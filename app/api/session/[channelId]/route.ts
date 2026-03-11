@@ -7,9 +7,9 @@ type Params = {
   };
 };
 
-export function GET(_req: NextRequest, { params }: Params) {
+export async function GET(_req: NextRequest, { params }: Params) {
   const channelId = params.channelId;
-  const session = getSession(channelId);
+  const session = await getSession(channelId);
 
   if (!session) {
     return NextResponse.json(

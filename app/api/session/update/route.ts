@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    setSession(payload.channel_id, payload);
+    await setSession(payload.channel_id, payload);
 
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -111,8 +111,9 @@ export async function POST(req: NextRequest) {
 }
 
 // Вспомогательный GET, чтобы можно было посмотреть список доступных каналов
-export function GET() {
-  const summary = listSessions().map((s) => ({
+export async function GET() {
+  const sessions = await listSessions();
+  const summary = sessions.map((s) => ({
     channel_id: s.channel_id,
     nickname: s.nickname,
     fights: s.fights.length,
