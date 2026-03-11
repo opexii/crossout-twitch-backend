@@ -1087,17 +1087,22 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
     selfPlayer ?? players[0] ?? null,
   );
 
-  // Подсветка тех, кого убил выбранный игрок (черепа), как в основном приложении
+  // Подсветка строк: по кому стрелял (damage_to_players) + кого убил (kills_to_players), как в основном приложении
   const highlightVictims = (() => {
-    const k2p = selectedPlayer?.kills_to_players;
-    if (!k2p) return undefined;
+    const d2p = selectedPlayer?.damage_to_players ?? {};
+    const k2p = selectedPlayer?.kills_to_players ?? {};
     const s = new Set<string>();
+    for (const nick of Object.keys(d2p)) {
+      if (!nick || nick.includes(":")) continue;
+      if ((d2p[nick] ?? 0) <= 0) continue;
+      s.add(nick);
+    }
     for (const [nick, count] of Object.entries(k2p)) {
       if (!nick || nick.includes(":")) continue;
       if (!count || count <= 0) continue;
       s.add(nick);
     }
-    return s;
+    return s.size ? s : undefined;
   })();
 
   const killsToPlayers = selectedPlayer?.kills_to_players ?? {};
