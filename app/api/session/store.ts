@@ -33,8 +33,12 @@ declare global {
 }
 
 async function getRedisUrlClient() {
-  const url = process.env.REDIS_URL;
+  let url = process.env.REDIS_URL;
   if (!url) return null;
+  // Redis Labs и многие облачные Redis требуют TLS из serverless (Vercel)
+  if (url.startsWith("redis://") && url.includes("redislabs.com")) {
+    url = url.replace("redis://", "rediss://");
+  }
   if (globalThis.__redisUrlClient && globalThis.__redisUrlClientUrl === url)
     return globalThis.__redisUrlClient;
   try {
