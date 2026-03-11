@@ -24,21 +24,22 @@ async function getKv() {
 }
 
 // Поддержка REDIS_URL (redis://... — например Redis из маркетплейса Vercel)
+// Тип через any, чтобы избежать конфликта между redis и @redis/client при присвоении в globalThis
 declare global {
   // eslint-disable-next-line no-var
-  var __redisUrlClient: import("redis").RedisClientType | null | undefined;
+  var __redisUrlClient: { get: (k: string) => Promise<string | null>; set: (k: string, v: string, opts?: { EX?: number }) => Promise<string | undefined>; keys: (pattern: string) => Promise<string[]>; connect: () => Promise<void>; isOpen: boolean; on: (ev: string, fn: (err: Error) => void) => void } | null | undefined;
   // eslint-disable-next-line no-var
   var __redisUrlClientUrl: string | undefined;
 }
 
-async function getRedisUrlClient(): Promise<import("redis").RedisClientType | null> {
+async function getRedisUrlClient() {
   const url = process.env.REDIS_URL;
   if (!url) return null;
   if (globalThis.__redisUrlClient && globalThis.__redisUrlClientUrl === url)
     return globalThis.__redisUrlClient;
   try {
     const { createClient } = await import("redis");
-    const client = createClient({ url });
+    const client = createClient({ url }) as unknown as NonNullable<typeof globalThis.__redisUrlClient>;
     client.on("error", (err) => console.error("Redis client error:", err));
     if (!client.isOpen) await client.connect();
     globalThis.__redisUrlClient = client;
