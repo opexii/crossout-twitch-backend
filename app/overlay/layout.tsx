@@ -31,6 +31,23 @@ export default function OverlayLayout({
             .overlay-scroll::-webkit-scrollbar-thumb:hover {
               background: #666;
             }
+            .overlay-scroll-x {
+              scrollbar-width: thin;
+              scrollbar-color: #555 #252525;
+            }
+            .overlay-scroll-x::-webkit-scrollbar {
+              height: 8px;
+            }
+            .overlay-scroll-x::-webkit-scrollbar-track {
+              background: #252525;
+            }
+            .overlay-scroll-x::-webkit-scrollbar-thumb {
+              background: #555;
+              border-radius: 4px;
+            }
+            .overlay-scroll-x::-webkit-scrollbar-thumb:hover {
+              background: #666;
+            }
           `,
         }}
       />

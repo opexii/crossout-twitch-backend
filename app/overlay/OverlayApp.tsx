@@ -622,12 +622,13 @@ function RatingView({ session }: { session: SessionResponseDto }) {
               </span>
             ) : null}
           </div>
-          <div style={{ overflowX: "auto" }}>
+          <div className="overlay-scroll-x" style={{ overflowX: "auto", minWidth: 0 }}>
             <table
               style={{
                 width: "100%",
+                minWidth: 480,
                 borderCollapse: "collapse",
-                fontSize: 15,
+                fontSize: 13,
               }}
             >
               <thead>
@@ -816,12 +817,13 @@ function RatingView({ session }: { session: SessionResponseDto }) {
               </span>
             ) : null}
           </div>
-          <div style={{ overflowX: "auto" }}>
+          <div className="overlay-scroll-x" style={{ overflowX: "auto", minWidth: 0 }}>
             <table
               style={{
                 width: "100%",
+                minWidth: 320,
                 borderCollapse: "collapse",
-                fontSize: 15,
+                fontSize: 13,
               }}
             >
               <thead>
@@ -963,8 +965,10 @@ function FightsTable({
       }}
     >
       <div
+        className="overlay-scroll overlay-scroll-x"
         style={{
           overflowY: shouldScroll ? "auto" : "visible",
+          overflowX: "auto",
           maxHeight: shouldScroll ? headerH + rowH * maxVisibleRows : undefined,
           borderRadius: 4,
         }}
@@ -972,8 +976,9 @@ function FightsTable({
         <table
           style={{
             width: "100%",
+            minWidth: 520,
             borderCollapse: "collapse",
-            fontSize: 15,
+            fontSize: 13,
           }}
         >
           <thead
@@ -1132,14 +1137,16 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
         <div style={{ marginBottom: 4, fontSize: 15, opacity: 0.8 }}>
           Режим FFA — результаты по игрокам
         </div>
-        <PlayersTable
-          fight={fight}
-          players={team1}
-          showPlacement
-          selectedPlayer={selectedPlayer}
-          onSelectPlayer={setSelectedPlayer}
-          highlightVictims={highlightVictims}
-        />
+        <div className="overlay-scroll-x" style={{ overflowX: "auto", minWidth: 0 }}>
+          <PlayersTable
+            fight={fight}
+            players={team1}
+            showPlacement
+            selectedPlayer={selectedPlayer}
+            onSelectPlayer={setSelectedPlayer}
+            highlightVictims={highlightVictims}
+          />
+        </div>
         <PlayerDetailsPanel player={selectedPlayer} fight={fight} />
       </div>
     );
@@ -1176,18 +1183,22 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           borderRadius: 4,
           background: "#1c1c1c",
           border: "1px solid #355a3a",
+          minWidth: 0,
+          overflow: "hidden",
         }}
       >
         <div style={{ marginBottom: 4, fontSize: 15, color: "#a5d6a7" }}>
           Команда 1
         </div>
-        <PlayersTable
-          fight={fight}
-          players={leftTeam}
-          selectedPlayer={selectedPlayer}
-          onSelectPlayer={setSelectedPlayer}
-          highlightVictims={highlightVictims}
-        />
+        <div className="overlay-scroll-x" style={{ overflowX: "auto", minWidth: 0 }}>
+          <PlayersTable
+            fight={fight}
+            players={leftTeam}
+            selectedPlayer={selectedPlayer}
+            onSelectPlayer={setSelectedPlayer}
+            highlightVictims={highlightVictims}
+          />
+        </div>
       </div>
       <div
         style={{
@@ -1195,19 +1206,23 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           borderRadius: 4,
           background: "#1c1c1c",
           border: "1px solid #5d4037",
+          minWidth: 0,
+          overflow: "hidden",
         }}
       >
         <div style={{ marginBottom: 4, fontSize: 15, color: "#ef9a9a" }}>
           Команда 2
         </div>
-        <PlayersTable
-          fight={fight}
-          players={rightTeam}
-          alignRight
-          selectedPlayer={selectedPlayer}
-          onSelectPlayer={setSelectedPlayer}
-          highlightVictims={highlightVictims}
-        />
+        <div className="overlay-scroll-x" style={{ overflowX: "auto", minWidth: 0 }}>
+          <PlayersTable
+            fight={fight}
+            players={rightTeam}
+            alignRight
+            selectedPlayer={selectedPlayer}
+            onSelectPlayer={setSelectedPlayer}
+            highlightVictims={highlightVictims}
+          />
+        </div>
       </div>
       {unknown.length > 0 && (
         <div
@@ -1217,18 +1232,22 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
             borderRadius: 4,
             background: "#1c1c1c",
             border: "1px solid #555",
+            minWidth: 0,
+            overflow: "hidden",
           }}
         >
           <div style={{ marginBottom: 4, fontSize: 15, opacity: 0.8 }}>
             Без команды
           </div>
-          <PlayersTable
-            fight={fight}
-            players={unknown}
-            selectedPlayer={selectedPlayer}
-            onSelectPlayer={setSelectedPlayer}
-            highlightVictims={highlightVictims}
-          />
+          <div className="overlay-scroll-x" style={{ overflowX: "auto", minWidth: 0 }}>
+            <PlayersTable
+              fight={fight}
+              players={unknown}
+              selectedPlayer={selectedPlayer}
+              onSelectPlayer={setSelectedPlayer}
+              highlightVictims={highlightVictims}
+            />
+          </div>
         </div>
       )}
       <div
@@ -1278,8 +1297,9 @@ function PlayersTable({
     <table
       style={{
         width: "100%",
+        minWidth: 520,
         borderCollapse: "collapse",
-        fontSize: 15,
+        fontSize: 13,
       }}
     >
       <thead>
@@ -1426,7 +1446,9 @@ function PlayerDetailsPanel({
         borderRadius: 4,
         background: "#151515",
         border: "1px solid #333",
-        fontSize: 15,
+        fontSize: 14,
+        overflowX: "auto",
+        minWidth: 0,
       }}
     >
       <div
@@ -1476,8 +1498,9 @@ function PlayerDetailsPanel({
             paddingTop: 6,
             borderTop: "1px solid #333",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: "minmax(160px, 1fr) minmax(160px, 1fr)",
             gap: 12,
+            minWidth: 360,
           }}
         >
           {/* Исходящий урон */}
@@ -1485,11 +1508,12 @@ function PlayerDetailsPanel({
             style={{
               borderRight: "1px solid #333",
               paddingRight: 8,
+              minWidth: 0,
             }}
           >
             <div
               style={{
-                fontSize: 15,
+                fontSize: 13,
                 fontWeight: 600,
                 marginBottom: 4,
                 textTransform: "uppercase",
@@ -1551,10 +1575,10 @@ function PlayerDetailsPanel({
           </div>
 
           {/* Входящий урон */}
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div
               style={{
-                fontSize: 15,
+                fontSize: 13,
                 fontWeight: 600,
                 marginBottom: 4,
                 textTransform: "uppercase",
