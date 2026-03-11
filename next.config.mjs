@@ -5,9 +5,6 @@ const isTwitchExport = process.env.BUILD_FOR_TWITCH === "1";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
   ...(isTwitchExport && {
     output: "export",
     rewrites: undefined,
