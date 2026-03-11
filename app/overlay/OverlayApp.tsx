@@ -74,9 +74,12 @@ export function OverlayApp() {
         fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         background: "rgba(0,0,0,0.85)",
         color: "#eee",
-        minHeight: "100vh",
+        height: "100vh",
         padding: 12,
         boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
       }}
     >
       {!channelId && (
@@ -88,10 +91,6 @@ export function OverlayApp() {
             </p>
           )}
         </div>
-      )}
-
-      {channelId && (
-        <p style={{ fontSize: 12, opacity: 0.7 }}>Канал: {channelId}</p>
       )}
 
       {error && (
@@ -119,7 +118,14 @@ export function OverlayApp() {
       )}
 
       {data && (
-        <>
+        <div
+          className="overlay-scroll"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+          }}
+        >
           <SessionHeader session={data} />
 
           <Tabs active={activeTab} onChange={setActiveTab} />
@@ -133,7 +139,7 @@ export function OverlayApp() {
           )}
 
           {activeTab === "rating" && <RatingView session={data} />}
-        </>
+        </div>
       )}
     </div>
   );
