@@ -171,10 +171,12 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
         }),
       ),
     );
-    if (filtered.length) return filtered.join(", ");
-    // Если всё отфильтровали, не показываем "CarPart_*"
-    if (raw.includes("CarPart_")) return "—";
-    return raw;
+    let name = filtered.length ? filtered.join(", ") : raw.includes("CarPart_") ? "—" : raw;
+    const avgDmg = s.avg_damage;
+    if (name !== "—" && typeof avgDmg === "number" && avgDmg >= 0) {
+      name += ` (ср.урон: ${Math.round(avgDmg)})`;
+    }
+    return name;
   })();
 
   const ratingTabs = session.rating_tabs || [];
