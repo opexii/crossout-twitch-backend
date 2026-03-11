@@ -1087,16 +1087,32 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
     selfPlayer ?? players[0] ?? null,
   );
 
+  // Подсветка тех, кого убил выбранный игрок (черепа), как в основном приложении
   const highlightVictims = (() => {
-    if (!selectedPlayer?.damage_to_players) return undefined;
+    const k2p = selectedPlayer?.kills_to_players;
+    if (!k2p) return undefined;
     const s = new Set<string>();
-    for (const [nick, dmg] of Object.entries(selectedPlayer.damage_to_players)) {
+    for (const [nick, count] of Object.entries(k2p)) {
       if (!nick || nick.includes(":")) continue;
-      if (!dmg || dmg <= 0) continue;
+      if (!count || count <= 0) continue;
       s.add(nick);
     }
     return s;
   })();
+
+  const killsToPlayers = selectedPlayer?.kills_to_players ?? {};
+
+  // Группы (party): показываем 👥 только если в группе ≥2 человек
+  const partyCounts: Record<number, number> = {};
+  for (const p of players) {
+    const pid = p.party ?? 0;
+    if (pid > 0) partyCounts[pid] = (partyCounts[pid] || 0) + 1;
+  }
+  const realParties = new Set(
+    Object.entries(partyCounts)
+      .filter(([, count]) => count >= 2)
+      .map(([pid]) => Number(pid)),
+  );
 
   const team1: PlayerDto[] = [];
   const team2: PlayerDto[] = [];
@@ -1145,6 +1161,8 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
             selectedPlayer={selectedPlayer}
             onSelectPlayer={setSelectedPlayer}
             highlightVictims={highlightVictims}
+            killsToPlayers={killsToPlayers}
+            realParties={realParties}
           />
         </div>
         <PlayerDetailsPanel player={selectedPlayer} fight={fight} />
@@ -1197,6 +1215,8 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
             selectedPlayer={selectedPlayer}
             onSelectPlayer={setSelectedPlayer}
             highlightVictims={highlightVictims}
+            killsToPlayers={killsToPlayers}
+            realParties={realParties}
           />
         </div>
       </div>
@@ -1221,6 +1241,8 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
             selectedPlayer={selectedPlayer}
             onSelectPlayer={setSelectedPlayer}
             highlightVictims={highlightVictims}
+            killsToPlayers={killsToPlayers}
+            realParties={realParties}
           />
         </div>
       </div>
@@ -1246,6 +1268,8 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
               selectedPlayer={selectedPlayer}
               onSelectPlayer={setSelectedPlayer}
               highlightVictims={highlightVictims}
+              killsToPlayers={killsToPlayers}
+              realParties={realParties}
             />
           </div>
         </div>
@@ -1262,6 +1286,10 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
   );
 }
 
+const BOT_SYMBOL = "🤖";
+const PARTY_SYMBOL = "👥";
+const SKULL_SYMBOL = "💀";
+
 function PlayersTable({
   players,
   showPlacement = false,
@@ -1269,6 +1297,8 @@ function PlayersTable({
   onSelectPlayer,
   alignRight = false,
   highlightVictims,
+  killsToPlayers = {},
+  realParties = new Set<number>(),
 }: {
   fight: FightDto;
   players: PlayerDto[];
@@ -1277,10 +1307,24 @@ function PlayersTable({
   onSelectPlayer?: (p: PlayerDto) => void;
   alignRight?: boolean;
   highlightVictims?: Set<string>;
+  killsToPlayers?: Record<string, number>;
+  realParties?: Set<number>;
 }) {
   if (!players.length) {
     return <div style={{ fontSize: 15, opacity: 0.7 }}>Нет данных.</div>;
   }
+
+  const formatNickname = (p: PlayerDto) => {
+    const inParty = (p.party ?? 0) > 0 && realParties.has(p.party ?? 0);
+    const skullCount = highlightVictims?.has(p.nickname)
+      ? (killsToPlayers[p.nickname] ?? 0)
+      : 0;
+    const skulls = skullCount > 0 ? SKULL_SYMBOL.repeat(Math.min(skullCount, 5)) : "";
+    if (alignRight) {
+      return <>{p.nickname}{inParty && <> {PARTY_SYMBOL}</>}{p.is_bot && <> {BOT_SYMBOL}</>}{skulls && <> {skulls}</>}</>;
+    }
+    return <>{p.is_bot && <>{BOT_SYMBOL} </>}{inParty && <>{PARTY_SYMBOL} </>}{p.nickname}{skulls && <> {skulls}</>}</>;
+  };
 
   const displayWeapons = (p: PlayerDto) => {
     const raw = p.weapons && p.weapons.length ? p.weapons : p.weapons_def;
@@ -1333,9 +1377,10 @@ function PlayersTable({
       </thead>
       <tbody>
         {players.map((p, idx) => {
+          const inParty = (p.party ?? 0) > 0 && realParties.has(p.party ?? 0);
           const nameStyle: React.CSSProperties = {
             fontWeight: p.is_self ? 700 : 400,
-            color: p.is_self ? "#4caf50" : p.is_bot ? "#9e9e9e" : "#fff",
+            color: p.is_self ? "#4caf50" : inParty ? "#81C784" : p.is_bot ? "#9e9e9e" : "#fff",
           };
           const placeLabel =
             showPlacement && p.placement != null ? p.placement : idx + 1;
@@ -1364,10 +1409,7 @@ function PlayersTable({
               {!alignRight && (
                 <>
                   <td style={tdStyle}>
-                    <span style={nameStyle}>{p.nickname}</span>
-                    {p.is_bot && (
-                      <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
-                    )}
+                    <span style={nameStyle}>{formatNickname(p)}</span>
                   </td>
                   <td style={tdStyle}>
                     {displayWeapons(p)}
@@ -1396,10 +1438,7 @@ function PlayersTable({
                     {displayWeapons(p)}
                   </td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>
-                    <span style={nameStyle}>{p.nickname}</span>
-                    {p.is_bot && (
-                      <span style={{ opacity: 0.6, marginLeft: 4 }}>(бот)</span>
-                    )}
+                    <span style={nameStyle}>{formatNickname(p)}</span>
                   </td>
                 </>
               )}

@@ -16,6 +16,8 @@ export interface PlayerDto {
   nickname: string;
   team: string | number | null;
   is_bot: boolean;
+  /** ID группы (party); 0 — не в группе */
+  party?: number;
   power_score: number;
   kills: number;
   deaths: number;
@@ -31,6 +33,8 @@ export interface PlayerDto {
   is_self: boolean;
   placement?: number;
   damage_to_players?: Record<string, number>;
+  /** Кого убил этот игрок: { nickname: количество убийств } */
+  kills_to_players?: Record<string, number>;
 }
 
 export interface FightDto {
