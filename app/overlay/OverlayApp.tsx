@@ -80,13 +80,14 @@ export function OverlayApp() {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        fontSize: 15,
       }}
     >
       {!channelId && (
         <div style={{ fontSize: 14 }}>
           <p>Ожидание channelId от Twitch / URL…</p>
           {isInIframe && (
-            <p style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>
+            <p style={{ fontSize: 15, opacity: 0.8, marginTop: 6 }}>
               На стриме подождите до 15 сек. Если не загрузится — откройте оверлей в браузере с <code style={{ fontSize: 11 }}>?channel=ВАШ_ID</code>.
             </p>
           )}
@@ -100,7 +101,7 @@ export function OverlayApp() {
             padding: 8,
             background: "#5a1f1f",
             borderRadius: 4,
-            fontSize: 13,
+            fontSize: 15,
           }}
         >
           Ошибка: {error}
@@ -192,7 +193,7 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
         borderRadius: 4,
         background: "#1c1c1c",
         border: "1px solid #333",
-        fontSize: 13,
+        fontSize: 15,
       }}
     >
       <div
@@ -254,7 +255,7 @@ function Tabs({
   const baseStyle: React.CSSProperties = {
     padding: "4px 10px",
     cursor: "pointer",
-    fontSize: 13,
+    fontSize: 15,
   };
   const activeStyle: React.CSSProperties = {
     ...baseStyle,
@@ -346,7 +347,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
           borderRadius: 4,
           background: "#1c1c1c",
           border: "1px solid #333",
-          fontSize: 13,
+          fontSize: 15,
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
           gap: 12,
@@ -367,6 +368,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [search, setSearch] = useState("");
+  const [weaponSearch, setWeaponSearch] = useState("");
   const [selectedNick, setSelectedNick] = useState<string | null>(null);
   const [selectedWeapon, setSelectedWeapon] = useState<string | null>(null);
   type SortDir = "asc" | "desc";
@@ -451,9 +453,17 @@ function RatingView({ session }: { session: SessionResponseDto }) {
     return (Number(av) - Number(bv)) * dir;
   });
 
-  const filteredWeaponsWithSelection = selectedNick
-    ? allWeapons.filter((w) => (w.players || []).includes(selectedNick))
+  const weaponNorm = weaponSearch.trim().toLowerCase();
+  const weaponsFilteredBySearch = weaponNorm
+    ? allWeapons.filter((w) =>
+        w.name.toLowerCase().includes(weaponNorm),
+      )
     : allWeapons;
+  const filteredWeaponsWithSelection = selectedNick
+    ? weaponsFilteredBySearch.filter((w) =>
+        (w.players || []).includes(selectedNick),
+      )
+    : weaponsFilteredBySearch;
   const filteredWeapons = [...filteredWeaponsWithSelection].sort((a, b) => {
     const dir = weaponSort.dir === "asc" ? 1 : -1;
     const k = weaponSort.key;
@@ -504,7 +514,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
                 cursor: "pointer",
                 padding: "4px 10px",
                 borderRadius: 4,
-                fontSize: 12,
+                fontSize: 15,
                 backgroundColor: isActive ? "#2e7d32" : "transparent",
                 color: isActive ? "#fff" : "#ddd",
               }}
@@ -515,34 +525,54 @@ function RatingView({ session }: { session: SessionResponseDto }) {
         })}
       </div>
 
-      {/* Поиск по никнейму */}
+      {/* Поиск по никнейму и по оружию */}
       <div
         style={{
           display: "flex",
+          flexWrap: "wrap",
           alignItems: "center",
           gap: 8,
           marginBottom: 8,
-          fontSize: 12,
+          fontSize: 15,
         }}
       >
         <span>Поиск:</span>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Введите ник..."
+          placeholder="По нику..."
           style={{
-            flex: "0 0 200px",
+            flex: "0 0 140px",
             background: "#111",
             border: "1px solid #444",
             borderRadius: 4,
-            padding: "3px 6px",
+            padding: "4px 8px",
             color: "#eee",
-            fontSize: 12,
+            fontSize: 15,
+          }}
+        />
+        <input
+          value={weaponSearch}
+          onChange={(e) => setWeaponSearch(e.target.value)}
+          placeholder="По оружию..."
+          style={{
+            flex: "0 0 140px",
+            background: "#111",
+            border: "1px solid #444",
+            borderRadius: 4,
+            padding: "4px 8px",
+            color: "#eee",
+            fontSize: 15,
           }}
         />
         <span style={{ opacity: 0.7 }}>
           Игроков: {filteredPlayers.length}/{allPlayers.length}
         </span>
+        {weaponNorm && (
+          <span style={{ opacity: 0.7 }}>
+            Оружие: {filteredWeapons.length}/{allWeapons.length}
+          </span>
+        )}
         {(selectedNick || selectedWeapon) && (
           <button
             type="button"
@@ -558,7 +588,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
               borderRadius: 4,
               padding: "2px 8px",
               cursor: "pointer",
-              fontSize: 12,
+              fontSize: 15,
             }}
           >
             Сбросить выбор
@@ -583,7 +613,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
             padding: 6,
           }}
         >
-          <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.9 }}>
+          <div style={{ marginBottom: 4, fontSize: 15, opacity: 0.9 }}>
             Игроки — {active.name}
             {selectedWeapon ? (
               <span style={{ opacity: 0.75 }}>
@@ -597,7 +627,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
               style={{
                 width: "100%",
                 borderCollapse: "collapse",
-                fontSize: 11,
+                fontSize: 15,
               }}
             >
               <thead>
@@ -773,7 +803,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
             padding: 6,
           }}
         >
-          <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.9 }}>
+          <div style={{ marginBottom: 4, fontSize: 15, opacity: 0.9 }}>
             Оружие — {active.name}
             {selectedNick ? (
               <span style={{ opacity: 0.75 }}>
@@ -791,7 +821,7 @@ function RatingView({ session }: { session: SessionResponseDto }) {
               style={{
                 width: "100%",
                 borderCollapse: "collapse",
-                fontSize: 11,
+                fontSize: 15,
               }}
             >
               <thead>
@@ -943,7 +973,7 @@ function FightsTable({
           style={{
             width: "100%",
             borderCollapse: "collapse",
-            fontSize: 12,
+            fontSize: 15,
           }}
         >
           <thead
@@ -1099,7 +1129,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           border: "1px solid #333",
         }}
       >
-        <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.8 }}>
+        <div style={{ marginBottom: 4, fontSize: 15, opacity: 0.8 }}>
           Режим FFA — результаты по игрокам
         </div>
         <PlayersTable
@@ -1148,7 +1178,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           border: "1px solid #355a3a",
         }}
       >
-        <div style={{ marginBottom: 4, fontSize: 13, color: "#a5d6a7" }}>
+        <div style={{ marginBottom: 4, fontSize: 15, color: "#a5d6a7" }}>
           Команда 1
         </div>
         <PlayersTable
@@ -1167,7 +1197,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
           border: "1px solid #5d4037",
         }}
       >
-        <div style={{ marginBottom: 4, fontSize: 13, color: "#ef9a9a" }}>
+        <div style={{ marginBottom: 4, fontSize: 15, color: "#ef9a9a" }}>
           Команда 2
         </div>
         <PlayersTable
@@ -1189,7 +1219,7 @@ function FightTeamsPanel({ fight }: { fight: FightDto }) {
             border: "1px solid #555",
           }}
         >
-          <div style={{ marginBottom: 4, fontSize: 13, opacity: 0.8 }}>
+          <div style={{ marginBottom: 4, fontSize: 15, opacity: 0.8 }}>
             Без команды
           </div>
           <PlayersTable
@@ -1230,7 +1260,7 @@ function PlayersTable({
   highlightVictims?: Set<string>;
 }) {
   if (!players.length) {
-    return <div style={{ fontSize: 12, opacity: 0.7 }}>Нет данных.</div>;
+    return <div style={{ fontSize: 15, opacity: 0.7 }}>Нет данных.</div>;
   }
 
   const displayWeapons = (p: PlayerDto) => {
@@ -1249,7 +1279,7 @@ function PlayersTable({
       style={{
         width: "100%",
         borderCollapse: "collapse",
-        fontSize: 11,
+        fontSize: 15,
       }}
     >
       <thead>
@@ -1396,7 +1426,7 @@ function PlayerDetailsPanel({
         borderRadius: 4,
         background: "#151515",
         border: "1px solid #333",
-        fontSize: 12,
+        fontSize: 15,
       }}
     >
       <div
@@ -1459,7 +1489,7 @@ function PlayerDetailsPanel({
           >
             <div
               style={{
-                fontSize: 11,
+                fontSize: 15,
                 fontWeight: 600,
                 marginBottom: 4,
                 textTransform: "uppercase",
@@ -1524,7 +1554,7 @@ function PlayerDetailsPanel({
           <div>
             <div
               style={{
-                fontSize: 11,
+                fontSize: 15,
                 fontWeight: 600,
                 marginBottom: 4,
                 textTransform: "uppercase",
