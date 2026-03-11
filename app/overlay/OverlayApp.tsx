@@ -1349,8 +1349,9 @@ function PlayersTable({
       ? (killsToPlayers[p.nickname] ?? 0)
       : 0;
     const skulls = skullCount > 0 ? SKULL_SYMBOL.repeat(Math.min(skullCount, 5)) : "";
+    // Левая таблица: черепа справа от никнейма. Правая таблица: черепа слева от никнейма.
     if (alignRight) {
-      return <>{p.nickname}{inParty && <> {PARTY_SYMBOL}</>}{p.is_bot && <> {BOT_SYMBOL}</>}{skulls && <> {skulls}</>}</>;
+      return <>{skulls && <>{skulls} </>}{p.nickname}{inParty && <> {PARTY_SYMBOL}</>}{p.is_bot && <> {BOT_SYMBOL}</>}</>;
     }
     return <>{p.is_bot && <>{BOT_SYMBOL} </>}{inParty && <>{PARTY_SYMBOL} </>}{p.nickname}{skulls && <> {skulls}</>}</>;
   };
