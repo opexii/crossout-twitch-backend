@@ -151,6 +151,32 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
   const winrate =
     s.wins + s.losses > 0 ? (s.wins / (s.wins + s.losses)) * 100 : 0;
 
+  const ratingTabs = session.rating_tabs || [];
+  const baseTab =
+    ratingTabs.find((t) => t.id === "missions") || ratingTabs[0] || null;
+
+  // Ср. урон именно с текущим оружием (из рейтинга по оружию), а не за всю сессию
+  const avgDamageForWeapon = (() => {
+    const raw = (s.weapon_set || "").trim();
+    if (!raw || raw === "Неизвестно" || raw === "-" || !baseTab?.weapons?.length)
+      return null;
+    const weaponNames = raw
+      .split(",")
+      .map((p) => p.trim())
+      .filter((v) => v && v !== "Неизвестно" && v !== "-" && !v.startsWith("CarPart_") && !v.startsWith("preset_") && !v.includes(":"));
+    const firstWeaponName = weaponNames[0];
+    if (!firstWeaponName) return null;
+    const weaponRow = baseTab.weapons.find(
+      (w) => w.name.trim() === firstWeaponName,
+    );
+    const playerRow = weaponRow?.player_rows?.find(
+      (p) => p.nickname === session.nickname,
+    );
+    if (playerRow != null && typeof playerRow.avg_damage === "number")
+      return playerRow.avg_damage;
+    return null;
+  })();
+
   const weaponLabel = (() => {
     const raw = (s.weapon_set || "").trim();
     if (!raw || raw === "Неизвестно" || raw === "-") return "—";
@@ -163,7 +189,6 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
         parts.filter((p) => {
           const v = p.trim();
           if (!v || v === "Неизвестно" || v === "-") return false;
-          // Технические имена, которые не должны попадать в оверлей
           if (v.startsWith("CarPart_")) return false;
           if (v.startsWith("preset_")) return false;
           if (v.includes(":")) return false;
@@ -172,16 +197,13 @@ function SessionHeader({ session }: { session: SessionResponseDto }) {
       ),
     );
     let name = filtered.length ? filtered.join(", ") : raw.includes("CarPart_") ? "—" : raw;
-    const avgDmg = s.avg_damage;
-    if (name !== "—" && typeof avgDmg === "number" && avgDmg >= 0) {
+    const avgDmg = avgDamageForWeapon ?? (typeof s.avg_damage === "number" && s.avg_damage >= 0 ? s.avg_damage : null);
+    if (name !== "—" && avgDmg != null) {
       name += ` (ср.урон: ${Math.round(avgDmg)})`;
     }
     return name;
   })();
 
-  const ratingTabs = session.rating_tabs || [];
-  const baseTab =
-    ratingTabs.find((t) => t.id === "missions") || ratingTabs[0] || null;
   const ratingFromTable =
     baseTab?.players?.find((p) => p.nickname === session.nickname)?.rating ??
     null;
