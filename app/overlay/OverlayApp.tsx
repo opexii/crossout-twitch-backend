@@ -15,6 +15,11 @@ export function OverlayApp() {
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("history");
   const [selectedFightIndex, setSelectedFightIndex] = useState<number>(0);
+  const [isInIframe, setIsInIframe] = useState(false);
+
+  useEffect(() => {
+    setIsInIframe(typeof window !== "undefined" && window.self !== window.top);
+  }, []);
 
   // Получаем channelId из Twitch или query-параметра
   useEffect(() => {
@@ -77,7 +82,7 @@ export function OverlayApp() {
       {!channelId && (
         <div style={{ fontSize: 14 }}>
           <p>Ожидание channelId от Twitch / URL…</p>
-          {typeof window !== "undefined" && window.self !== window.top && (
+          {isInIframe && (
             <p style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>
               На стриме подождите до 15 сек. Если не загрузится — откройте оверлей в браузере с <code style={{ fontSize: 11 }}>?channel=ВАШ_ID</code>.
             </p>
