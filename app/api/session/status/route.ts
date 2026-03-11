@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { listSessions } from "../store";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/session/status — диагностика: какой storage используется и сколько сессий.
  */

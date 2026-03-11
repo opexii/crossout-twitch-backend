@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "../store";
 
+export const dynamic = "force-dynamic";
+
 type Params = {
   params: {
     channelId: string;

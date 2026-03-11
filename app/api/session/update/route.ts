@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listSessions, setSession } from "../store";
 
+export const dynamic = "force-dynamic";
+
 export type SessionPayload = {
   schema: number;
   channel_id: string;
