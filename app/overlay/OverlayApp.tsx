@@ -75,7 +75,14 @@ export function OverlayApp() {
       }}
     >
       {!channelId && (
-        <p style={{ fontSize: 14 }}>Ожидание channelId от Twitch / URL…</p>
+        <div style={{ fontSize: 14 }}>
+          <p>Ожидание channelId от Twitch / URL…</p>
+          {typeof window !== "undefined" && window.self !== window.top && (
+            <p style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>
+              На стриме подождите до 15 сек. Если не загрузится — откройте оверлей в браузере с <code style={{ fontSize: 11 }}>?channel=ВАШ_ID</code>.
+            </p>
+          )}
+        </div>
       )}
 
       {channelId && (
