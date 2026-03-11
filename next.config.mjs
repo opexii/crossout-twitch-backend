@@ -10,7 +10,7 @@ const nextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors https://www.twitch.tv https://supervisor.twitch.tv https://extension-files.twitch.tv; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://extension-files.twitch.tv",
+            value: "frame-ancestors https://www.twitch.tv https://player.twitch.tv https://embed.twitch.tv https://supervisor.twitch.tv https://extension-files.twitch.tv https://twitch.tv; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://extension-files.twitch.tv",
           },
         ],
       },
