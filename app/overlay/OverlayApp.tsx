@@ -71,18 +71,33 @@ export function OverlayApp() {
   return (
     <div
       style={{
-        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-        background: "rgba(0,0,0,0.85)",
-        color: "#eee",
-        height: "100vh",
-        padding: 12,
+        minHeight: "100vh",
         boxSizing: "border-box",
         display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        fontSize: 15,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 32,
+        background: "transparent",
       }}
     >
+      <div
+        style={{
+          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          background: "rgba(0,0,0,0.85)",
+          color: "#eee",
+          maxWidth: 720,
+          maxHeight: "88vh",
+          width: "100%",
+          padding: 12,
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          fontSize: 15,
+          borderRadius: 8,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+        }}
+      >
       {!channelId && (
         <div style={{ fontSize: 14 }}>
           <p>Ожидание channelId от Twitch / URL…</p>
@@ -142,6 +157,7 @@ export function OverlayApp() {
           {activeTab === "rating" && <RatingView session={data} />}
         </div>
       )}
+      </div>
     </div>
   );
 }
