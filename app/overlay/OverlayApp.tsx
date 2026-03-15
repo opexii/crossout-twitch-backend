@@ -76,7 +76,7 @@ export function OverlayApp() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 32,
+        padding: "32px 15px",
         background: "transparent",
       }}
     >
