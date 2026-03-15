@@ -76,7 +76,7 @@ export function OverlayApp() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "32px 15px",
+        padding: "24px 8px",
         background: "transparent",
       }}
     >
@@ -85,8 +85,8 @@ export function OverlayApp() {
           fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
           background: "rgba(0,0,0,0.85)",
           color: "#eee",
-          maxWidth: 720,
-          maxHeight: "88vh",
+          maxWidth: 960,
+          maxHeight: "90vh",
           width: "100%",
           padding: 12,
           boxSizing: "border-box",
