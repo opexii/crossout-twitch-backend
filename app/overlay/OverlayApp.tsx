@@ -85,7 +85,7 @@ export function OverlayApp() {
           fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
           background: "rgba(0,0,0,0.85)",
           color: "#eee",
-          maxWidth: 960,
+          maxWidth: 1060,
           maxHeight: "90vh",
           width: "100%",
           padding: 12,
